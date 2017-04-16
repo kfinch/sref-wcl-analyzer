@@ -4,6 +4,10 @@ $(document).ready(function() {
 	$("#report-button").button().click(function() {
 		console.log("report button pressed");
 		
+		// where fight info will be populated
+		var fightDiv = $("#fight-div");
+		fightDiv.empty();
+		
 		// get fights JSON
 		var reportCode = $("#report-input").val();
 		console.log("reportCode=" + reportCode);
@@ -17,13 +21,20 @@ $(document).ready(function() {
     			console.log( "success" );
 			console.log( JSON.stringify(data) );
 		
-			var fightSelect = $('<select>').appendTo("#fight-div");
+			// add fight select menu
+			var fightSelect = $('<select>').appendTo(fightDiv);
 			fightSelect.addClass("form-control"); // bootstrap style
 			$(data.fights).each(function() {
 				if(this.boss != 0) { // bosses only
- 					fightSelect.append($("<option>").text(formatFight(this)));
+					var fightOption = $("<option>").text(formatFight(this))
+					jQuery.data( fightOption, "fight", this ); // attach fight info to menu option
+ 					fightSelect.append(fightOption);
 				}
 			});
+			
+			// add analyze button
+			var analyzeButton = $('<button/>', {text: "Analyze", id: "analyze-button"});
+			analyzeButton.appendTo(fightDiv);
   		})
   		.fail(function() {
     			console.log( "error" );
