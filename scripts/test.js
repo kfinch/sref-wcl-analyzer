@@ -20,7 +20,9 @@ $(document).ready(function() {
 			var fightSelect = $('<select>').appendTo("#fight-div");
 			fightSelect.addClass("form-control"); // bootstrap style
 			$(data.fights).each(function() {
- 				fightSelect.append($("<option>").text(formatFight(this)));
+				if(this.boss != 0) { // bosses only
+ 					fightSelect.append($("<option>").text(formatFight(this)));
+				}
 			});
   		})
   		.fail(function() {
@@ -33,14 +35,11 @@ $(document).ready(function() {
 		console.log( JSON.stringify(fight) );
 		stringResult = "";
 		stringResult += fight.name + " (" + formatFightTime(fight) + ")";
-		if( fight.boss != 0 ) {
-			stringResult += " (BOSS";
-			if( fight.kill ) {
-				stringResult += " KILL)";
-			} else {
-				var percent = Math.floor(fight.bossPercentage / 100);
-				stringResult += " WIPE @" + percent + "%)";
-			}
+		if( fight.kill ) {
+			stringResult += " (KILL)";
+		} else {
+			var percent = Math.floor(fight.bossPercentage / 100);
+			stringResult += " (WIPE @ " + percent + "%)";
 		}
 		console.log(stringResult);
 		return stringResult;
