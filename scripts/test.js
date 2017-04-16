@@ -32,7 +32,7 @@ $(document).ready(function() {
 	function formatFight( fight ) { // expects 'fight' structure from array in report JSON
 		console.log( JSON.stringify(fight) );
 		stringResult = "";
-		stringResult += fight.name + " (" + formatFightTime(fight.endTime - fight.startTime) + ")";
+		stringResult += fight.name + " (" + formatFightTime(fight.end_time - fight.start_time) + ")";
 		if( fight.boss != 0 ) {
 			stringResult += " (BOSS)";
 		}
