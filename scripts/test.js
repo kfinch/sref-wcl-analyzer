@@ -37,7 +37,7 @@ $(document).ready(function() {
 			var analyzeButton = $('<button/>', {text: "Analyze", id: "analyze-button"});
 			analyzeButton.addClass("btn btn-success");
 			analyzeButton.appendTo(fightDiv);
-			analyzeButton.button().click(handleAnalyzeButtonClick());
+			analyzeButton.button().click(handleAnalyzeButtonClick);
   		})
   		.fail(function() {
     			console.log( "error" );
@@ -47,6 +47,7 @@ $(document).ready(function() {
 
 	function handleAnalyzeButtonClick() {
 		var selectedOption = $("#fight-select option:selected");
+		console.log( selectedOption );
 		console.log( JSON.stringify(selectedOption.fight) );
 	}
 	
