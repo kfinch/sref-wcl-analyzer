@@ -29,6 +29,10 @@ $(document).ready(function() {
 				if(this.boss != 0) { // bosses only
 					var fightOption = $("<option>").text(formatFight(this))
 					jQuery.data( fightOption, "fight", this ); // attach fight info to menu option
+					
+					var testRetFight = jQuery.data( fightOption, "fight" );
+					console.log( "fightRet: " + JSON.stringify(testRetFight));
+					
  					fightSelect.append(fightOption);
 				}
 			});
