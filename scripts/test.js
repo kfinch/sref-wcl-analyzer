@@ -1,3 +1,9 @@
+$(document).ready(function(){
+    alert("jQuery works!");
+});
+
+
+
 function getFights() {
 	// make menu
 	var menuDiv = document.getElementById('menu-div'); 
