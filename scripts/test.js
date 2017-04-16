@@ -46,9 +46,9 @@ $(document).ready(function() {
 	});
 
 	function handleAnalyzeButtonClick() {
-		var selectedOption = $("#fight-select option:selected");
-		console.log( selectedOption );
-		console.log( JSON.stringify(selectedOption.fight) );
+		var selectedOption = $("#fight-select option:selected")[0];
+		var selectedFight = jQuery.data( selectedOption, "fight" );
+		console.log( JSON.stringify(selectedFight) );
 	}
 	
 	function analyzeEach( analyzers, reportCode, startTime, endTime ) {
