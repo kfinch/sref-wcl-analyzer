@@ -50,7 +50,7 @@ $(document).ready(function() {
 	});
 
 	function handleAnalyzeButtonClick() {
-		var selectedOption = $("#fight-select option:selected")[0];
+		var selectedOption = $("#fight-select :selected");
 		console.log( selectedOption );
 		var selectedFight = jQuery.data( selectedOption, "fight" );
 		console.log( JSON.stringify(selectedFight) );
