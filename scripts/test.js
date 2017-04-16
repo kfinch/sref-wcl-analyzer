@@ -34,7 +34,13 @@ $(document).ready(function() {
 		stringResult = "";
 		stringResult += fight.name + " (" + formatFightTime(fight) + ")";
 		if( fight.boss != 0 ) {
-			stringResult += " (BOSS)";
+			stringResult += " (BOSS";
+			if( fight.kill ) {
+				stringResult += " KILL)";
+			} else {
+				var percent = Math.floor(fight.bossPercentage / 100);
+				stringResult += " WIPE @" + percent + "%)";
+			}
 		}
 		console.log(stringResult);
 		return stringResult;
