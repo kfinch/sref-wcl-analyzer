@@ -19,7 +19,7 @@ $(document).ready(function() {
 		
 			var fightSelect = $('<select>').appendTo("#fight-div");
 			$(data.fights).each(function() {
- 				sel.append($("<option>").text(this.name));
+ 				fightSelect.append($("<option>").text(this.name));
 			});
   		})
   		.fail(function() {
