@@ -20,17 +20,7 @@ $(document).ready(function(){
   		.fail(function() {
     			console.log( "error" );
   		});
- 
 		
-		var reportObj = $.getJSON(url);
-		
-		console.log(JSON.stringify(reportObj));
-		
-		// test if we've got fights JSON
-		var fights = reportObj.fights;		
-		$("#fight-div").append(fights[0].name);
 	});
-	
-	function 
 
 });
