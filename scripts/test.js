@@ -1,5 +1,10 @@
 $(document).ready(function(){
     alert("jQuery works!");
+	
+    $("#fight-button").button().click(function(){
+        alert("button");
+    });    
+
 });
 
 
