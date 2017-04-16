@@ -30,6 +30,7 @@ $(document).ready(function() {
 	});
 	
 	function formatFight( fight ) { // expects 'fight' structure from array in report JSON
+		console.log( JSON.stringify(fight) );
 		stringResult = "";
 		stringResult.concat(fight.name);
 		if( fight.boss != 0 ) {
