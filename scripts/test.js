@@ -1,6 +1,8 @@
 $(document).ready(function() {
 	console.log("document ready!");
 	
+	var apiKey = "087783eb78c21061d028831d2344d118";
+	
 	$("#report-button").button().click(function() {
 		console.log("report button pressed");
 		
@@ -11,7 +13,6 @@ $(document).ready(function() {
 		// get fights JSON
 		var reportCode = $("#report-input").val();
 		console.log("reportCode=" + reportCode);
-		var apiKey = "087783eb78c21061d028831d2344d118";
 		var url = "https://www.warcraftlogs.com/v1/report/fights/" + reportCode
 	  		+ "?api_key=" + apiKey;
 		console.log("fetching json from " + url);
@@ -22,7 +23,7 @@ $(document).ready(function() {
 			console.log( JSON.stringify(data) );
 		
 			// add fight select menu
-			var fightSelect = $('<select>').appendTo(fightDiv);
+			var fightSelect = $('<select>', {id: "fight-select"}).appendTo(fightDiv);
 			fightSelect.addClass("form-control"); // bootstrap style
 			$(data.fights).each(function() {
 				if(this.boss != 0) { // bosses only
@@ -42,6 +43,32 @@ $(document).ready(function() {
   		});
 		
 	});
+	
+	$("#analyze-button").button().click(function() {
+		var selectedOption = $("#fight-select option:selected");
+		console.log( JSON.stringify(selectedOption.fight) );
+	}
+	
+	function analyzeEach( analyzers, reportCode, startTime, endTime ) {
+		
+	}
+	
+	function getEventsPage( reportCode, startTime, endTime ) {
+		var url = "https://www.warcraftlogs.com/v1/report/events/" + reportCode +
+		    "?api_key=" + apiKey +
+		    "&start=" + startTime +
+		    "&end=" + endTime;
+		
+		var resultData;
+		var pageReq = $.getJSON(url)
+		.done(function(data) {
+			resultData = data;
+		})
+		.fail(function() {
+			
+		});
+		return resultData;
+	}
 	
 	function formatFight( fight ) { // expects 'fight' structure from array in report JSON
 		console.log( JSON.stringify(fight) );
