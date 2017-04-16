@@ -18,8 +18,9 @@ $(document).ready(function() {
 			console.log( JSON.stringify(data) );
 		
 			var fightSelect = $('<select>').appendTo("#fight-div");
+			fightSelect.addClass("form-control"); // bootstrap style
 			$(data.fights).each(function() {
- 				fightSelect.append($("<option>").text(this.name));
+ 				fightSelect.append($("<option>").text(formatFight(this)));
 			});
   		})
   		.fail(function() {
@@ -27,5 +28,14 @@ $(document).ready(function() {
   		});
 		
 	});
+	
+	function formatFight( fight ) { // expects 'fight' structure from array in report JSON
+		stringResult = "";
+		stringResult.concat(fight.name);
+		if( fight.boss != 0 ) {
+			stringResult.concat(" (BOSS)");
+		}
+		return stringResult;
+	}
 
 });
