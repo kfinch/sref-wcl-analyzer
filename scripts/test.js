@@ -5,7 +5,7 @@ $(document).ready(function(){
 		console.log("report button pressed");
 		
 		// get fights JSON
-		var reportCode = $("#report-input:input");
+		var reportCode = $("#report-input").value;
 		var apiKey = "087783eb78c21061d028831d2344d118";
 		var url = "https://www.warcraftlogs.com/v1/report/fights/" + reportCode
 	  		+ "?api_key=" + apiKey;
