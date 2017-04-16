@@ -1,7 +1,7 @@
-$(document).ready(function(){
+$(document).ready(function() {
 	console.log("document ready!");
 	
-	$("#report-button").button().click(function(){
+	$("#report-button").button().click(function() {
 		console.log("report button pressed");
 		
 		// get fights JSON
