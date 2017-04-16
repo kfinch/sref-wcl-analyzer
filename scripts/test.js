@@ -34,6 +34,7 @@ $(document).ready(function() {
 			
 			// add analyze button
 			var analyzeButton = $('<button/>', {text: "Analyze", id: "analyze-button"});
+			analyzeButton.addClass("btn btn-success");
 			analyzeButton.appendTo(fightDiv);
   		})
   		.fail(function() {
