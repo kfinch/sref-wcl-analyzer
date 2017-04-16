@@ -47,7 +47,7 @@ $(document).ready(function() {
 	$("#analyze-button").button().click(function() {
 		var selectedOption = $("#fight-select option:selected");
 		console.log( JSON.stringify(selectedOption.fight) );
-	}
+	});
 	
 	function analyzeEach( analyzers, reportCode, startTime, endTime ) {
 		
