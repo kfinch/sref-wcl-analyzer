@@ -9,7 +9,7 @@ $(document).ready(function(){
 		var apiKey = "087783eb78c21061d028831d2344d118";
 		var url = "https://www.warcraftlogs.com/v1/report/fights/" + reportCode
 	  		+ "?api_key=" + apiKey;
-		var reportObj = $.getJson(url);
+		var reportObj = $.getJSON(url);
 		
 		console.log("fetching json from " + url);
 		console.log(JSON.stringify(reportObj));
