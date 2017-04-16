@@ -32,11 +32,24 @@ $(document).ready(function() {
 	function formatFight( fight ) { // expects 'fight' structure from array in report JSON
 		console.log( JSON.stringify(fight) );
 		stringResult = "";
-		stringResult.concat(fight.name);
+		stringResult += fight.name + " (" + formatFightTime(fight.endTime - fight.startTime) + ")";
 		if( fight.boss != 0 ) {
-			stringResult.concat(" (BOSS)");
+			stringResult += " (BOSS)";
 		}
+		console.log(stringResult);
 		return stringResult;
+	}
+	
+	function formatFightTime( totalSeconds ) {
+		var minutes = Math.floor(totalSeconds / 60);
+		var seconds = totalSeconds - (minutes*60);
+		
+		var result = "" + minutes + ":";
+		if(seconds < 10) {
+			result += "0";
+		}
+		result += seconds;
+		return result;
 	}
 
 });
