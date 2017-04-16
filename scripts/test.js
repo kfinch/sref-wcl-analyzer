@@ -16,6 +16,11 @@ $(document).ready(function() {
 		.done(function(data) {
     			console.log( "success" );
 			console.log( JSON.stringify(data) );
+		
+			var fightSelect = $('<select>').appendTo("#fight-div");
+			$(data.fights).each(function() {
+ 				sel.append($("<option>").text(this.name));
+			});
   		})
   		.fail(function() {
     			console.log( "error" );
