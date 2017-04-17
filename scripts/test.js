@@ -28,8 +28,8 @@ $(document).ready(function() {
 			$(data.fights).each(function() {
 				if(this.boss != 0) { // bosses only
 					var fightOption = $("<option>").text(formatFight(this));
-					fightOption.attr("data_start", this.start_time);
-					fightOption.attr("data_end", this.end_time);					
+					fightOption.attr("data-start", this.start_time);
+					fightOption.attr("data-end", this.end_time);					
  					fightSelect.append(fightOption);
 				}
 			});
@@ -52,7 +52,7 @@ $(document).ready(function() {
 		
 		var selectedOption = $("#fight-select :selected")[0];
 		console.log( selectedOption );
-		resultDiv.append(selectedOption.attr(data_start) + " " + selectedOption.attr(data_end));
+		resultDiv.append(selectedOption.attr("data-start") + " " + selectedOption.attr("data-end"));
 	}
 	
 	function analyzeEach( analyzers, reportCode, startTime, endTime ) {
