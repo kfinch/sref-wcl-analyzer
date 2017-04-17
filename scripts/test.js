@@ -25,12 +25,11 @@ $(document).ready(function() {
 			// add fight select menu
 			var fightSelect = $('<select>', {id: "fight-select"}).appendTo(fightDiv);
 			fightSelect.addClass("form-control"); // bootstrap style
+			fightSelect.data("reportCode", reportCode); // for retrieval by analyze button
 			$(data.fights).each(function() {
 				if(this.boss != 0) { // bosses only
 					var fightOption = $("<option>").text(formatFight(this));
-					fightOption.attr("data-start", this.start_time);
-					fightOption.attr("data-end", this.end_time);
-					fightOption.data("fight", this);
+					fightOption.data("fight", this); // attach fight object to option
  					fightSelect.append(fightOption);
 				}
 			});
@@ -52,12 +51,55 @@ $(document).ready(function() {
 		resultDiv.empty();
 		
 		var selectedOption = $("#fight-select :selected").first();
+		var fightInfo = selectedOption.data("fight");
+		
+		var reportCode = $("#fight-select").data("reportCode");
+		
 		console.log( selectedOption );
-		resultDiv.append(selectedOption.attr("data-start") + " " + selectedOption.attr("data-end"));
 		console.log( JSON.stringify(selectedOption.data("fight")) );
+		
+		var results = analyzeEach( null, reportCode, fightInfo.start_time, fightInfo.end_time );
+		//results.forEach(function() {
+		//	resultDiv.append(this);
+		//});
+		// TODO: attach results to select option so don't have to re-analyze going back to previously analyzed fight
 	}
 	
-	function analyzeEach( analyzers, reportCode, startTime, endTime ) {
+	/*
+	 * This function is the top level 'fight analyze' function.
+	 * analyzer - an 'analyzer' object, which must have:
+	 *			an consumeEvent(WCLEvent) function
+	 *			and a getResults() function that returns a jQuery obj encapsulating results
+	 * reportCode - the WCL report code
+	 * startTime - millis since start of report to start analysis at
+	 * endTime - millis since start of report to end analysis at
+	 *
+	 * @returns an array of jQuery objects (to be inserted into results-div)
+	 *
+	 * As a side effect, this function also creates an updates a progress bar in results-div
+	 */
+	function analyzeEach( analyzer, reportCode, startTime, endTime ) {		
+		var currTime = startTime;
+		while (true) {
+			updateProgressBar( currTime, startTime, endTime );
+			
+			var eventPage = getEventsPage( reportCode, currTime, endTime );
+			var events = eventPage.events;
+			for (var i=0; i<events.length; i++) {
+				//analyzer.consumeEvent(events[i]);
+			}
+			
+			if ("nextPageTimestamp" in eventPage) {
+				currTime = eventPage.nextPageTimestamp;
+			} else {
+				break;
+			}
+		}
+		
+		//return analyzer.getResults();
+	}
+	
+	function updateProgressBar( currTime, startTime, endTime ) {
 		
 	}
 	
