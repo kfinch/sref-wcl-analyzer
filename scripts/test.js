@@ -27,11 +27,9 @@ $(document).ready(function() {
 			fightSelect.addClass("form-control"); // bootstrap style
 			$(data.fights).each(function() {
 				if(this.boss != 0) { // bosses only
-					var fightOption = $("<option>").text(formatFight(this))
-					jQuery.data( fightOption, "fight", this ); // attach fight info to menu option
-					
-					var testRetFight = jQuery.data( fightOption, "fight" );
-					console.log( "fightRet: " + JSON.stringify(testRetFight));
+					var fightOption = $("<option>").text(formatFight(this));
+					fightOption.attr("data-start", this.start_time);
+					fightOption.attr("data-end", this.end_time);
 					
  					fightSelect.append(fightOption);
 				}
@@ -50,10 +48,13 @@ $(document).ready(function() {
 	});
 
 	function handleAnalyzeButtonClick() {
-		var selectedOption = $("#fight-select :selected");
+		var resultDiv = $("#result-div");
+		resultDiv.empty();
+		
+		var selectedOption = $("#fight-select :selected")[0];
 		console.log( selectedOption );
-		var selectedFight = jQuery.data( selectedOption, "fight" );
-		console.log( JSON.stringify(selectedFight) );
+		resultDiv.append(selectedOption.data-start + " " + selectedOption.data-end);
+		
 	}
 	
 	function analyzeEach( analyzers, reportCode, startTime, endTime ) {
