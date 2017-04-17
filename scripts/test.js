@@ -29,7 +29,8 @@ $(document).ready(function() {
 				if(this.boss != 0) { // bosses only
 					var fightOption = $("<option>").text(formatFight(this));
 					fightOption.attr("data-start", this.start_time);
-					fightOption.attr("data-end", this.end_time);					
+					fightOption.attr("data-end", this.end_time);
+					fightOption.data("fight", this);
  					fightSelect.append(fightOption);
 				}
 			});
@@ -50,9 +51,10 @@ $(document).ready(function() {
 		var resultDiv = $("#result-div");
 		resultDiv.empty();
 		
-		var selectedOption = $("#fight-select :selected")[0];
+		var selectedOption = $("#fight-select :selected").first();
 		console.log( selectedOption );
 		resultDiv.append(selectedOption.attr("data-start") + " " + selectedOption.attr("data-end"));
+		console.log( JSON.stringify(selectedOption.data("fight")) );
 	}
 	
 	function analyzeEach( analyzers, reportCode, startTime, endTime ) {
