@@ -28,6 +28,7 @@ $(document).ready(function() {
 			$(data.fights).each(function() {
 				if(this.boss != 0) { // bosses only
 					var fightOption = $("<option>").text(formatFight(this));
+					fightOption.data("fight", this);
 					fightOption.attr("data-start", this.start_time);
 					fightOption.attr("data-end", this.end_time);
 					
@@ -53,7 +54,8 @@ $(document).ready(function() {
 		
 		var selectedOption = $("#fight-select :selected")[0];
 		console.log( selectedOption );
-		resultDiv.append(selectedOption.data-start + " " + selectedOption.data-end);
+		var fightInfo = selectedOption.data("fight");
+		resultDiv.append(fightInfo.start_time + " " + fightInfo.end_time);
 		
 	}
 	
