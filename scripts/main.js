@@ -3,7 +3,18 @@ $(document).ready(function() {
 	
 	var apiKey = "087783eb78c21061d028831d2344d118";
 	
-	$("#report-button").button().click(function() {
+	// init initial app elements: input for report code, and button to dispatch query
+	$("<div>", {id: "report-div", "class": "form-inline"})
+			.appendTo($("#app-container"));
+			
+	$("<input>", {id: "report-input", "class": "form-control", "placeholder": "Report Code..."})
+			.appendTo($("#report-div"));
+			
+	$("<button>", {id: "report-button", "class": "btn btn-primart", "value": "Get")
+			.click(getReport())
+			.appendTo($("#report-div"));
+	
+	function getReport() {
 		console.log("report button pressed");
 		
 		// where fight info will be populated
@@ -15,11 +26,10 @@ $(document).ready(function() {
 		console.log("reportCode=" + reportCode);
 		var url = "https://www.warcraftlogs.com/v1/report/fights/" + reportCode
 	  		+ "?api_key=" + apiKey;
-		console.log("fetching json from " + url);
+		console.log("fetching report json from " + url);
 		
 		var reportReq = $.getJSON(url)
 		.done(function(data) {
-    			console.log( "success" );
 			console.log( JSON.stringify(data) );
 		
 			// add fight select menu
@@ -38,15 +48,14 @@ $(document).ready(function() {
 			var analyzeButton = $('<button/>', {text: "Analyze", id: "analyze-button"});
 			analyzeButton.addClass("btn btn-success");
 			analyzeButton.appendTo(fightDiv);
-			analyzeButton.button().click(handleAnalyzeButtonClick);
+			analyzeButton.button().click(analyzeFight);
   		})
   		.fail(function() {
-    			console.log( "error" );
+    			console.log( "error fetching report json..." );
   		});
-		
-	});
+	}
 
-	function handleAnalyzeButtonClick() {
+	function analyzeFight() {
 		var resultDiv = $("#result-div");
 		resultDiv.empty();
 		
