@@ -10,9 +10,9 @@ $(document).ready(function() {
 	$("<input>", {id: "report-input", "class": "form-control", "placeholder": "Report Code..."})
 			.appendTo($("#report-div"));
 			
-	$("<button>", {id: "report-button", "class": "btn btn-primart")
+	$("<button>", {id: "report-button", "class": "btn btn-primary"})
 			.text("Get")
-			.click(getReport())
+			.click(getReport)
 			.appendTo($("#report-div"));
 	
 	/**
@@ -40,13 +40,14 @@ $(document).ready(function() {
 			console.log( JSON.stringify(data) );
 		
 			// add fight select menu
+			$('<br>').appendTo(fightsDiv); // adding some padding first...
 			var fightSelect = $('<select>', {id: "fight-select", "class": "form-control"})
 					.data("reportCode", reportCode) // for retrieve at analysis time
 					.appendTo(fightsDiv);
 			$(data.fights).each(function() {
 				if(this.boss != 0) { // bosses only
 					$("<option>")
-							.text(formatFight(this));
+							.text(formatFight(this))
 							.data("fight", this) // attach fight object to option
 							.appendTo(fightSelect);
 				}
@@ -137,7 +138,7 @@ $(document).ready(function() {
 		var resultData;
 		var pageReq = $.getJSON(url)
 		.done(function(data) {
-			resultData = data;
+			resultData = data; // FIXME this assign isn't working right...
 		})
 		.fail(function() {
 			
