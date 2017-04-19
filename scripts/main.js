@@ -14,6 +14,8 @@ $(document).ready(function() {
 			.text("Get")
 			.click(getReport)
 			.appendTo($("#report-div"));
+			
+	$('<br>').appendTo($("#app-container"));
 	
 	/**
 	 * Called when the 'Get' button is pressed for a report
@@ -40,7 +42,6 @@ $(document).ready(function() {
 			console.log( JSON.stringify(data) );
 		
 			// add fight select menu
-			$('<br>').appendTo(fightsDiv); // adding some padding first...
 			var fightSelect = $('<select>', {id: "fight-select", "class": "form-control"})
 					.data("reportCode", reportCode) // for retrieve at analysis time
 					.appendTo(fightsDiv);
@@ -54,17 +55,23 @@ $(document).ready(function() {
 			});
 			
 			// add analyze button
-			$('<button/>', {text: "Analyze", id: "analyze-button", "class": "btn btn-success"})
+			$('<button/>', {id: "analyze-button", "class": "btn btn-success"})
 					.text("Analyze")
 					.click(analyzeFight)
 					.appendTo(fightsDiv);
   		})
-  		.fail(function() {
-				// TODO expose error message to end user
+  		.fail(function(data) { // bad report code returns an error message, which we'll pass to the user
     			console.log( "error fetching report json..." );
+				console.log( JSON.stringify(data) );
+				$('<div>', {"class": "alert alert-danger"})
+						.text("ERROR: " + data.responseJSON.error)
+						.appendTo(fightsDiv);
   		});
 	}
 
+	/*
+	 * Entry function for analysis. Sets up data and then enters callback loop as data is fetched.
+	 */
 	function analyzeFight() {
 		console.log("analyze button pressed");
 		
@@ -83,68 +90,80 @@ $(document).ready(function() {
 		console.log( selectedOption );
 		console.log( JSON.stringify(selectedOption.data("fight")) );
 		
-		var results = analyzeEach( null, reportCode, fightInfo.start_time, fightInfo.end_time );
+		// this enters callback loop as pages of data are sequentially fetched and analyzed
+		// analyzers need data to be sequential, so we can't parallelize this without a lot of effort
+		fetchPage( null, reportCode, fightInfo.start_time, fightInfo.start_time, fightInfo.end_time );
+		
 		//results.forEach(function() {
 		//	resultDiv.append(this);
 		//});
-		// TODO: attach results to select option so don't have to re-analyze going back to previously analyzed fight
+		// TODO: this needs to be in 'complete' function
 	}
 	
 	/*
-	 * This function is the top level 'fight analyze' function.
+	 * fetchPage() and analyzePage() functions loops to perform the fight analysis.
+	 * Fetches are async but data must be analyzed sequentially, hence the loop.
+	 * As a side effect also creates and displays a progress bar in the analysis-div
+	 *
 	 * analyzer - an 'analyzer' object, which must have:
 	 *			an consumeEvent(WCLEvent) function
 	 *			and a getResults() function that returns a jQuery obj encapsulating results
+	 * data - a page of data
 	 * reportCode - the WCL report code
 	 * startTime - millis since start of report to start analysis at
+	 * currTime - 
 	 * endTime - millis since start of report to end analysis at
-	 *
-	 * @returns an array of jQuery objects (to be inserted into results-div)
 	 *
 	 * As a side effect, this function also creates an updates a progress bar in results-div
 	 */
-	function analyzeEach( analyzer, reportCode, startTime, endTime ) {		
-		var currTime = startTime;
-		while (true) {
-			updateProgressBar( currTime, startTime, endTime );
-			
-			var eventPage = getEventsPage( reportCode, currTime, endTime );
-			var events = eventPage.events;
-			for (var i=0; i<events.length; i++) {
-				//analyzer.consumeEvent(events[i]);
-			}
-			
-			if ("nextPageTimestamp" in eventPage) {
-				currTime = eventPage.nextPageTimestamp;
-			} else {
-				break;
-			}
-		}
-		
-		//return analyzer.getResults();
-	}
 	
-	function updateProgressBar( currTime, startTime, endTime ) {
-		
-	}
-	
-	function getEventsPage( reportCode, startTime, endTime ) {
+	/*
+	 * Fetches page of data, hands it off to analyzePage()
+	 */
+	function fetchPage( analyzer, reportCode, startTime, currTime, endTime ) {
 		var url = "https://www.warcraftlogs.com/v1/report/events/" + reportCode +
 		    "?api_key=" + apiKey +
-		    "&start=" + startTime +
+		    "&start=" + currTime +
 		    "&end=" + endTime;
 		console.log("fetching event page json from " + url);
 		
-		var resultData;
 		var pageReq = $.getJSON(url)
 		.done(function(data) {
-			resultData = data; // FIXME this assign isn't working right...
+			analyzePage( analyzer, data, reportCode, startTime, currTime, endTime );
 		})
 		.fail(function() {
-			
+			// analysisFail();
 		});
-		return resultData;
+		
 	}
+	
+	/*
+	 * Analyzes a page of data. If there's more, gets next with fetchPage(). If not calls analysisDone().
+	 */
+	function analyzePage( analyzer, data, reportCode, startTime, currTime, endTime ) {
+		// TODO update progress bar?
+		
+		var events = data.events;
+		for (var i=0; i<events.length; i++) {
+			//analyzer.consumeEvent(events[i]);
+		}
+		
+		if ("nextPageTimestamp" in data) {
+			fetchPage(analyzer, reportCode, startTime, data.nextPageTimestamp, endTime);
+		} else {
+			analysisDone(analyzer);
+		}
+	}
+	
+	function updateProgressBar( currTime, startTime, endTime ) {
+		// TODO implement
+	}
+	
+	function analysisDone( analyzer ) {
+		// TODO implement
+	}
+	
+	// Utils below, TODO move to utils.js file?
 	
 	function formatFight( fight ) { // expects 'fight' structure from array in report JSON
 		console.log( JSON.stringify(fight) );
