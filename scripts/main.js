@@ -10,16 +10,23 @@ $(document).ready(function() {
 	$("<input>", {id: "report-input", "class": "form-control", "placeholder": "Report Code..."})
 			.appendTo($("#report-div"));
 			
-	$("<button>", {id: "report-button", "class": "btn btn-primart", "value": "Get")
+	$("<button>", {id: "report-button", "class": "btn btn-primart")
+			.text("Get")
 			.click(getReport())
 			.appendTo($("#report-div"));
 	
+	/**
+	 * Called when the 'Get' button is pressed for a report
+	 */
 	function getReport() {
 		console.log("report button pressed");
 		
-		// where fight info will be populated
-		var fightDiv = $("#fight-div");
-		fightDiv.empty();
+		// remove previous fights div
+		$("#fights-div").remove();
+		
+		// make new fights div for generate content
+		var fightsDiv = $("<div>", {id: "fights-div", "class": "form-inline"})
+				.appendTo($("#app-container"));
 		
 		// get fights JSON
 		var reportCode = $("#report-input").val();
@@ -33,31 +40,39 @@ $(document).ready(function() {
 			console.log( JSON.stringify(data) );
 		
 			// add fight select menu
-			var fightSelect = $('<select>', {id: "fight-select"}).appendTo(fightDiv);
-			fightSelect.addClass("form-control"); // bootstrap style
-			fightSelect.data("reportCode", reportCode); // for retrieval by analyze button
+			var fightSelect = $('<select>', {id: "fight-select", "class": "form-control"})
+					.data("reportCode", reportCode) // for retrieve at analysis time
+					.appendTo(fightsDiv);
 			$(data.fights).each(function() {
 				if(this.boss != 0) { // bosses only
-					var fightOption = $("<option>").text(formatFight(this));
-					fightOption.data("fight", this); // attach fight object to option
- 					fightSelect.append(fightOption);
+					$("<option>")
+							.text(formatFight(this));
+							.data("fight", this) // attach fight object to option
+							.appendTo(fightSelect);
 				}
 			});
 			
 			// add analyze button
-			var analyzeButton = $('<button/>', {text: "Analyze", id: "analyze-button"});
-			analyzeButton.addClass("btn btn-success");
-			analyzeButton.appendTo(fightDiv);
-			analyzeButton.button().click(analyzeFight);
+			$('<button/>', {text: "Analyze", id: "analyze-button", "class": "btn btn-success"})
+					.text("Analyze")
+					.click(analyzeFight)
+					.appendTo(fightsDiv);
   		})
   		.fail(function() {
+				// TODO expose error message to end user
     			console.log( "error fetching report json..." );
   		});
 	}
 
 	function analyzeFight() {
-		var resultDiv = $("#result-div");
-		resultDiv.empty();
+		console.log("analyze button pressed");
+		
+		// remove previous analysis div
+		$("#analysis-div").remove();
+		
+		// make new analysis div for generate content
+		var analysisDiv = $("<div>", {id: "analysis-div"})
+				.appendTo($("#fights-div"));
 		
 		var selectedOption = $("#fight-select :selected").first();
 		var fightInfo = selectedOption.data("fight");
@@ -117,6 +132,7 @@ $(document).ready(function() {
 		    "?api_key=" + apiKey +
 		    "&start=" + startTime +
 		    "&end=" + endTime;
+		console.log("fetching event page json from " + url);
 		
 		var resultData;
 		var pageReq = $.getJSON(url)
