@@ -81,6 +81,7 @@ $(document).ready(function() {
 		// make new analysis div for generate content
 		var analysisDiv = $("<div>", {id: "analysis-div"})
 				.appendTo($("#fights-div"));
+		$('<br>').appendTo($("#analysis-div"));
 		
 		var selectedOption = $("#fight-select :selected").first();
 		var fightInfo = selectedOption.data("fight");
@@ -90,9 +91,12 @@ $(document).ready(function() {
 		console.log( selectedOption );
 		console.log( JSON.stringify(selectedOption.data("fight")) );
 		
+		// init analyzer
+		var analyzer = new TestAnalyzer();
+		
 		// this enters callback loop as pages of data are sequentially fetched and analyzed
 		// analyzers need data to be sequential, so we can't parallelize this without a lot of effort
-		fetchPage( null, reportCode, fightInfo.start_time, fightInfo.start_time, fightInfo.end_time );
+		fetchPage( analyzer, reportCode, fightInfo.start_time, fightInfo.start_time, fightInfo.end_time );
 		
 		//results.forEach(function() {
 		//	resultDiv.append(this);
@@ -106,12 +110,12 @@ $(document).ready(function() {
 	 * As a side effect also creates and displays a progress bar in the analysis-div
 	 *
 	 * analyzer - an 'analyzer' object, which must have:
-	 *			an consumeEvent(WCLEvent) function
-	 *			and a getResults() function that returns a jQuery obj encapsulating results
+	 *			a parse(WCLEvent) function
+	 *			and a getResults() function that returns an array of jQuery HTML objs displaying results
 	 * data - a page of data
 	 * reportCode - the WCL report code
 	 * startTime - millis since start of report to start analysis at
-	 * currTime - 
+	 * currTime - millis since start of report analysis is currently at. Used to req next page.
 	 * endTime - millis since start of report to end analysis at
 	 *
 	 * As a side effect, this function also creates an updates a progress bar in results-div
@@ -132,7 +136,10 @@ $(document).ready(function() {
 			analyzePage( analyzer, data, reportCode, startTime, currTime, endTime );
 		})
 		.fail(function() {
-			// analysisFail();
+			console.log( "error fetching fight json..." );
+			$('<div>', {"class": "alert alert-danger"})
+					.text("ERROR fetching fight data!")
+					.appendTo($("#analysis-div"));
 		});
 		
 	}
@@ -145,7 +152,7 @@ $(document).ready(function() {
 		
 		var events = data.events;
 		for (var i=0; i<events.length; i++) {
-			//analyzer.consumeEvent(events[i]);
+			analyzer.parse(events[i]);
 		}
 		
 		if ("nextPageTimestamp" in data) {
@@ -160,7 +167,11 @@ $(document).ready(function() {
 	}
 	
 	function analysisDone( analyzer ) {
-		// TODO implement
+		console.log("analysis done!");
+		var results = analyzer.getResults();
+		for(var i=0; i<results.length; i++) {
+			results[i].appendTo($("#analysis-div"));
+		}
 	}
 	
 	// Utils below, TODO move to utils.js file?
