@@ -208,11 +208,15 @@ function RestoDruidSubAnalyzer ( playerName, playerInfo ) {
 				.appendTo(res);
 				
 		for(var [hotId, hotHealingObj] of this.hotHealingMap.entries()) {
+			if(hotHealingObj.direct == 0) {
+				continue; // don't include result entry for HoT you never used
+			}
+			
 			var directPercent = Math.round(hotHealingObj.direct / this.totalHealing * 1000) / 10;
 			var masteryPercent = Math.round(hotHealingObj.mastery / this.totalHealing * 1000) / 10;		
 			var hotText = this.getSpellLinkHtml(hotId, this.hots.get(hotId)) + "<br>" +
-					"&emsp;Direct:" + directPercent + "%<br>" +
-					"&emsp;Mastery:" + masteryPercent + "%<br>";
+					"&emsp;Direct: <b>" + directPercent + "%</b><br>" +
+					"&emsp;Mastery: <b>" + masteryPercent + "%</b><br>";
 			console.log(hotText);
 			
 			$('<li>', {"class":"list-group-item small"})
