@@ -1,7 +1,7 @@
 $(document).ready(function() {
 	console.log("document ready!");
 	
-	var apiKey = "087783eb78c21061d028831d2344d118";
+	var apiKey = "230d616c242ecbd6e2bfc07c4593d485";
 	
 	// init initial app elements: input for report code, and button to dispatch query
 	$("<div>", {id: "report-div", "class": "form-inline"})
