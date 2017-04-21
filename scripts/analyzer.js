@@ -196,19 +196,44 @@ function RestoDruidSubAnalyzer ( playerName, playerInfo ) {
 	
 	
 	this.getResult = function() {
-		var testRes = $('<div>', {"class": "well well-sm"})
-				.text(playerName);
+		var res = $('<div>', {"class":"panel panel-default"});
 		
+		var playerNameElement = $('<div>', {"class":"panel-heading"})
+				.text(playerName)
+				.css('color', '#ff7d0a')
+				.css('font-weight', 'bold')
+				.appendTo(res);
+		
+		var hotsListElement = $('<ul>', {"class":"list-group"})
+				.appendTo(res);
+				
 		for(var [hotId, hotHealingObj] of this.hotHealingMap.entries()) {
 			var directPercent = Math.round(hotHealingObj.direct / this.totalHealing * 1000) / 10;
-			var masteryPercent = Math.round(hotHealingObj.mastery / this.totalHealing * 1000) / 10;
-			testRes.append("<p>" + this.hots.get(hotId) + " : " +
-					"direct=" + directPercent + "% " +
-					"mastery=" + masteryPercent + "% " +
-					"</p>");
+			var masteryPercent = Math.round(hotHealingObj.mastery / this.totalHealing * 1000) / 10;		
+			var hotText = this.getSpellLinkHtml(hotId, this.hots.get(hotId)) + "<br>" +
+					"&emsp;Direct:" + directPercent + "%<br>" +
+					"&emsp;Mastery:" + masteryPercent + "%<br>";
+			console.log(hotText);
+			
+			$('<li>', {"class":"list-group-item small"})
+				.html(hotText)
+				.appendTo(hotsListElement);
 		}
 		
-		return testRes;
+		return res;
+	}
+	
+	this.getSpellLinkHtml = function( spellId, spellName) {
+		/*
+		var spellHref = 'http://www.wowhead.com/spell=' + spellId;
+		var spellLink = $('<a>',{
+			text: spellName,
+			title: spellName,
+			href: 'http://www.wowhead.com/spell=' + spellId,
+			});
+		*/
+		
+		return '<a href="http://www.wowhead.com/spell=' + spellId + '">' + spellName + '</a>';
 	}
 	
 	
