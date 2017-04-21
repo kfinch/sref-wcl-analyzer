@@ -14,6 +14,11 @@ function TestAnalyzer () {
 		results.push(testRes);
 			
 		return results;
-	}
-	
+	}	
 }
+
+/*
+function RestoDruidSpellMasteryAnalyzer () {
+	this.
+}
+*/

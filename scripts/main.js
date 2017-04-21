@@ -94,14 +94,11 @@ $(document).ready(function() {
 		// init analyzer
 		var analyzer = new TestAnalyzer();
 		
+		initProgressBar();
+		
 		// this enters callback loop as pages of data are sequentially fetched and analyzed
 		// analyzers need data to be sequential, so we can't parallelize this without a lot of effort
 		fetchPage( analyzer, reportCode, fightInfo.start_time, fightInfo.start_time, fightInfo.end_time );
-		
-		//results.forEach(function() {
-		//	resultDiv.append(this);
-		//});
-		// TODO: this needs to be in 'complete' function
 	}
 	
 	/*
@@ -136,6 +133,7 @@ $(document).ready(function() {
 			analyzePage( analyzer, data, reportCode, startTime, currTime, endTime );
 		})
 		.fail(function() {
+			deleteProgressBar();
 			console.log( "error fetching fight json..." );
 			$('<div>', {"class": "alert alert-danger"})
 					.text("ERROR fetching fight data!")
@@ -148,7 +146,7 @@ $(document).ready(function() {
 	 * Analyzes a page of data. If there's more, gets next with fetchPage(). If not calls analysisDone().
 	 */
 	function analyzePage( analyzer, data, reportCode, startTime, currTime, endTime ) {
-		// TODO update progress bar?
+		updateProgressBar(startTime, currTime, endTime);
 		
 		var events = data.events;
 		for (var i=0; i<events.length; i++) {
@@ -162,17 +160,41 @@ $(document).ready(function() {
 		}
 	}
 	
-	function updateProgressBar( currTime, startTime, endTime ) {
-		// TODO implement
-	}
-	
 	function analysisDone( analyzer ) {
 		console.log("analysis done!");
+		deleteProgressBar();
 		var results = analyzer.getResults();
 		for(var i=0; i<results.length; i++) {
 			results[i].appendTo($("#analysis-div"));
 		}
 	}
+	
+	
+	/*
+	 * Progress Bar handling functions
+	 */
+	
+	function initProgressBar() {
+		var progressContainer  = $('<div>', {id:"progress-container", "class":"progress"})
+				.appendTo($("#analysis-div"));
+		
+		$('<div>', {id:"progress-bar", "class":"progress-bar progress-bar-info progress-bar-striped", "role":"progressbar",
+				"aria-valuenow":"0", "aria-valuemin":"0", "aria-valuemax":"100", "style":"width: 0%"})
+				.appendTo(progressContainer);
+	}
+	
+	function updateProgressBar( startTime, currTime, endTime ) {
+		var totalTimeInFight = endTime - startTime;
+		var currTimeInFight = currTime - startTime;
+		var currPercent = Math.round(currTimeInFight / totalTimeInFight * 100);
+		console.log($("#progress-bar").first());
+		$("#progress-bar").attr("aria-valuenow", currPercent).attr("style", "width: " + currPercent + "%");
+	}
+	
+	function deleteProgressBar() {
+		$("#progress-container").remove();
+	}
+
 	
 	// Utils below, TODO move to utils.js file?
 	
