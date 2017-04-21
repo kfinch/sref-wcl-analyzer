@@ -31,8 +31,21 @@ $(document).ready(function() {
 				.appendTo($("#app-container"));
 		
 		// get fights JSON
-		var reportCode = $("#report-input").val();
+		var reportCode = parseReportCode($("#report-input").val());
 		console.log("reportCode=" + reportCode);
+		
+		// TODO instead implement the below as input validation?
+		if(reportCode == null) {
+			console.log( "this doesn't look like a report code" );
+			$('<div>', {"class": "alert alert-danger"})
+					.text("Input isn't a WCL report...")
+					.appendTo(fightsDiv);
+			return;
+		} else {
+			// replaces full url with just report code in entry box for clarity
+			$("#report-input").val(reportCode);
+		}
+		
 		var url = "https://www.warcraftlogs.com/v1/report/fights/" + reportCode
 	  		+ "?api_key=" + apiKey;
 		console.log("fetching report json from " + url);
@@ -68,6 +81,29 @@ $(document).ready(function() {
 						.text("ERROR: " + errReport.responseJSON.error)
 						.appendTo(fightsDiv);
   		});
+	}
+	
+	/*
+	 * Detects either a pasted link or just a lone report code,
+	 * and returns the report code. If input doesn't look like a report code, returns null.
+	 */
+	function parseReportCode( input ) {
+		var wclUrlRegex = /warcraftlogs\.com\/reports\/([0-9a-zA-Z]*)/;
+		var codeAloneRegex = /^([0-9a-zA-Z]+)$/;
+		
+		var wclUrlMatch = wclUrlRegex.exec(input);
+		console.log(wclUrlMatch);
+		if(wclUrlMatch != null) {
+			return wclUrlMatch[1];
+		}
+		
+		var codeAloneMatch = codeAloneRegex.exec(input);
+		console.log(codeAloneMatch);
+		if(codeAloneMatch != null) {
+			return codeAloneMatch[1];
+		}
+		
+		return null;
 	}
 
 	/*
