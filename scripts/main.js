@@ -38,14 +38,15 @@ $(document).ready(function() {
 		console.log("fetching report json from " + url);
 		
 		var reportReq = $.getJSON(url)
-		.done(function(data) {
-			console.log( JSON.stringify(data) );
+		.done(function(report) {
+			console.log( JSON.stringify(report) );
 		
 			// add fight select menu
 			var fightSelect = $('<select>', {id: "fight-select", "class": "form-control"})
 					.data("reportCode", reportCode) // for retrieve at analysis time
+					.data("reportData", report)
 					.appendTo(fightsDiv);
-			$(data.fights).each(function() {
+			$(report.fights).each(function() {
 				if(this.boss != 0) { // bosses only
 					$("<option>")
 							.text(formatFight(this))
@@ -60,11 +61,11 @@ $(document).ready(function() {
 					.click(analyzeFight)
 					.appendTo(fightsDiv);
   		})
-  		.fail(function(data) { // bad report code returns an error message, which we'll pass to the user
+  		.fail(function(errReport) { // bad report code returns an error message, which we'll pass to the user
     			console.log( "error fetching report json..." );
-				console.log( JSON.stringify(data) );
+				console.log( JSON.stringify(errReport) );
 				$('<div>', {"class": "alert alert-danger"})
-						.text("ERROR: " + data.responseJSON.error)
+						.text("ERROR: " + errReport.responseJSON.error)
 						.appendTo(fightsDiv);
   		});
 	}
@@ -86,13 +87,15 @@ $(document).ready(function() {
 		var selectedOption = $("#fight-select :selected").first();
 		var fightInfo = selectedOption.data("fight");
 		
+		// retrieve report code and report data
 		var reportCode = $("#fight-select").data("reportCode");
+		var reportData = $("#fight-select").data("reportData");
 		
 		console.log( selectedOption );
 		console.log( JSON.stringify(selectedOption.data("fight")) );
 		
 		// init analyzer
-		var analyzer = new TestAnalyzer();
+		var analyzer = new MasterAnalyzer( getPlayerNameMapping( reportData ) );
 		
 		initProgressBar();
 		
@@ -169,6 +172,15 @@ $(document).ready(function() {
 		}
 	}
 	
+	function getPlayerNameMapping( reportData ) {
+		var playerNameMapping = new Map();
+		
+		for( friendly of reportData.friendlies ) {
+			playerNameMapping.set(friendly.id, friendly.name);
+		}
+		
+		return playerNameMapping;
+	} 
 	
 	/*
 	 * Progress Bar handling functions
@@ -178,7 +190,7 @@ $(document).ready(function() {
 		var progressContainer  = $('<div>', {id:"progress-container", "class":"progress"})
 				.appendTo($("#analysis-div"));
 		
-		$('<div>', {id:"progress-bar", "class":"progress-bar progress-bar-info progress-bar-striped", "role":"progressbar",
+		$('<div>', {id:"progress-bar", "class":"progress-bar progress-bar-striped", "role":"progressbar",
 				"aria-valuenow":"0", "aria-valuemin":"0", "aria-valuemax":"100", "style":"width: 0%"})
 				.appendTo(progressContainer);
 	}
