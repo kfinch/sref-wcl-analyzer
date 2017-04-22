@@ -93,6 +93,10 @@ function RestoDruidSubAnalyzer ( playerName, playerInfo ) {
 	this.playerId = playerInfo.sourceID;
 	
 	this.totalHealing = 0;
+	
+	this.totalNoMasteryHealing = 0;
+	this.masteryTimesHealing = 0; // for calculating avg mastery stacks
+	
 	this.hotHealingMap = new Map(); // map from hot ID to obj w/ direct healing and mastery healing
 	for(hotId of this.hots.keys()) {
 		this.hotHealingMap.set(hotId, {'direct':0, 'mastery':0});
@@ -180,10 +184,14 @@ function RestoDruidSubAnalyzer ( playerName, playerInfo ) {
 		
 		this.addSetIfAbsent(targetId);
 		var hotsOn = this.hotsOnTarget.get(targetId);
+		var numHotsOn = hotsOn.size;
+		var healWoMastery = this.getNoMasteryHealing(amount, numHotsOn);
+		this.totalNoMasteryHealing += healWoMastery
+		this.masteryTimesHealing += healWoMastery * numHotsOn;
 		for(hotOn of hotsOn) {
 			if(hotOn != spellId) { // prevents double count
 				this.hotHealingMap.get(hotOn).mastery +=
-						this.getOneStackMasteryHealing(amount, hotsOn.size);
+						this.getOneStackMasteryHealing(amount, numHotsOn);
 			}
 		}
 	}
@@ -192,6 +200,7 @@ function RestoDruidSubAnalyzer ( playerName, playerInfo ) {
 	this.absorbed = function( wclEvent ) {
 		// absorbs don't interact with mastery, but they do count towards total healing
 		this.totalHealing += wclEvent.amount;
+		this.totalNoMasteryHealing += wclEvent.amount;
 	}
 	
 	
@@ -207,6 +216,14 @@ function RestoDruidSubAnalyzer ( playerName, playerInfo ) {
 		var hotsListElement = $('<ul>', {"class":"list-group"})
 				.appendTo(res);
 				
+		// add report for avg HoT stacks
+		var avgMasteryStacks = this.masteryTimesHealing / this.totalNoMasteryHealing;
+		avgMasteryStacks = Math.round(avgMasteryStacks * 100) / 100;
+		$('<li>', {"class":"list-group-item small"})
+				.html("Average Mastery Stacks: <b>" + avgMasteryStacks + "</b>")
+				.appendTo(hotsListElement);
+		
+		// add report for each HoT		
 		for(var [hotId, hotHealingObj] of this.hotHealingMap.entries()) {
 			if(hotHealingObj.direct == 0) {
 				continue; // don't include result entry for HoT you never used
@@ -228,15 +245,6 @@ function RestoDruidSubAnalyzer ( playerName, playerInfo ) {
 	}
 	
 	this.getSpellLinkHtml = function( spellId, spellName) {
-		/*
-		var spellHref = 'http://www.wowhead.com/spell=' + spellId;
-		var spellLink = $('<a>',{
-			text: spellName,
-			title: spellName,
-			href: 'http://www.wowhead.com/spell=' + spellId,
-			});
-		*/
-		
 		return '<a href="http://www.wowhead.com/spell=' + spellId + '">' + spellName + '</a>';
 	}
 	
@@ -253,6 +261,13 @@ function RestoDruidSubAnalyzer ( playerName, playerInfo ) {
 		var masteryBonus = this.getCurrMastery();
 		var healMasteryMultiply = 1 + (hotCount * masteryBonus);
 		return Math.round(healAmount / (healMasteryMultiply / masteryBonus));
+	}
+	
+	// the amount of healing that would have been done without mastery
+	this.getNoMasteryHealing = function( healAmount, hotCount ) {
+		var masteryBonus = this.getCurrMastery();
+		var healMasteryMultiply = 1 + (hotCount * masteryBonus);
+		return Math.round(healAmount / healMasteryMultiply);
 	}
 	
 	// uses curr mastery rating (including buffs), and calcs mastery % from it
