@@ -37,10 +37,13 @@
       <div class="well text-justify">
         <h4>Resto Druid Analysis</h4>
 		<p><u>Average Mastery Stacks</u></p>
-		<p>Calculates the average number of mastery stacks you benefit from over all your healing. This average is weighted with respect to healing done (before mastery). Absorbs are factored into the average as 0-stacks healing.</p>
+		<p>Calculates the average number of mastery stacks you benefit from when healing. This average is weighted with respect to healing done (before mastery).</p>
+		<p>The 'All Healing' entry counts the average over all your healing (and absorbs), even ones that don't benefit from Mastery like Ysera's Gift or Prydaz. This can give you a good feel for how much Mastery is contributing to overall healing done.</p>
+		<p>The 'Druid Spells' entry counts the average only over the healing done by spells that can benefit from Mastery. This is likely the right number to enter into a spreadsheet for calculating stat weights.</p>
 		<br>
 		<p><u>Spell Mastery</u></p>
         <p>Calculates how much of your healing can be attributed to each of your HoT's mastery stacks. For example, if you took the talent <a href="http://www.wowhead.com/spell=200390/cultivation">Cultivation</a>, healing from your <i>other</i> spells on a target with your Cultivation on it will heal for more because of the extra mastery stack provided by Cultivation. This is healing that wouldn't have happened had you not specced Cultivation, but it's completely invisible in basic logs. This analyzer seeks to remedy the issue.</p>
+		<p>Results are presented as a percentage of your total healing done over the encounter, including from trinkets / legendaries. 'Direct' healing amounts should correspond to the numbers you see in the WCL report itself.</p>
         <p>Oh, and yes: <a href="http://www.wowhead.com/spell=22842/frenzied-regeneration">Frenzied Regeneration</a> does count towards mastery for whatever reason.</p>
       </div>
     </div>

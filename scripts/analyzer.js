@@ -70,7 +70,35 @@ function MasterAnalyzer ( playerNameMapping ) {
 
 function RestoDruidSubAnalyzer ( playerName, playerInfo ) {
 	
-	// Constants (TODO make these actually static?)
+	// CONSTANTS (TODO make these actually static?)
+	
+	// these are the spells that can be boosted by Mastery
+	this.druidHeals = new Map();
+	this.druidHeals.set(8936, "Regrowth");
+	this.druidHeals.set(774, "Rejuvenation");
+	this.druidHeals.set(155777, "Germination");
+	this.druidHeals.set(48438, "Wild Growth");
+	this.druidHeals.set(207386, "Spring Blossoms");
+	this.druidHeals.set(200389, "Cultivation");
+	this.druidHeals.set(102352, "Cenarion Ward");
+	this.druidHeals.set(33763, "Lifebloom");
+	this.druidHeals.set(22842, "Frenzied Regeneration");
+	this.druidHeals.set(5185 , "Healing Touch"); // y u casting it tho?
+	this.druidHeals.set(18562 , "Swiftmend");
+	// Living Seed doesn't directly benefit, but does through Regrowth.
+	// Including it on its own is technically wrong because it might heal with
+	// a different number of HoTs present than the Regrowth that spawned it.
+	// However, this is still a reasonable approximation.
+	this.druidHeals.set(48503 , "Living Seed");
+	this.druidHeals.set(157982 , "Tranquility");
+	this.druidHeals.set(81269 , "Effloresence");
+	this.druidHeals.set(189853 , "Dreamwalker");
+	this.druidHeals.set(189800 , "Nature's Essence");
+	this.druidHeals.set(33778, "Lifebloom Bloom");
+	// Ysera's Gift and Renewal don't benefit from Mastery,
+	// presumably because they already scale with your max health.
+	
+	// these are the spells that cause Mastery boosting
 	this.hots = new Map();
 	this.hots.set(8936, "Regrowth");
 	this.hots.set(774, "Rejuvenation");
@@ -89,12 +117,13 @@ function RestoDruidSubAnalyzer ( playerName, playerInfo ) {
 	this.baseMasteryPercent = 4.8;
 	this.masteryRatingPerOne = 666.6;
 	
-	// Instance Vars
+	// INSTANCE VARS
+	
 	this.playerId = playerInfo.sourceID;
 	
-	this.totalHealing = 0;
-	
-	this.totalNoMasteryHealing = 0;
+	this.totalHealing = 0; // total healing from all spells
+	this.totalNoMasteryHealing = 0; // total healing before mastery
+	this.druidSpellNoMasteryHealing = 0; // total healing before mastery from spells that benefit from mastery
 	this.masteryTimesHealing = 0; // for calculating avg mastery stacks
 	
 	this.hotHealingMap = new Map(); // map from hot ID to obj w/ direct healing and mastery healing
@@ -183,17 +212,24 @@ function RestoDruidSubAnalyzer ( playerName, playerInfo ) {
 		}
 		
 		this.addSetIfAbsent(targetId);
-		var hotsOn = this.hotsOnTarget.get(targetId);
-		var numHotsOn = hotsOn.size;
-		var healWoMastery = this.getNoMasteryHealing(amount, numHotsOn);
-		this.totalNoMasteryHealing += healWoMastery
-		this.masteryTimesHealing += healWoMastery * numHotsOn;
-		for(hotOn of hotsOn) {
-			if(hotOn != spellId) { // prevents double count
-				this.hotHealingMap.get(hotOn).mastery +=
-						this.getOneStackMasteryHealing(amount, numHotsOn);
+		if(this.druidHeals.has(spellId)) { // spell was boosted by mastery
+			var hotsOn = this.hotsOnTarget.get(targetId);
+			var numHotsOn = hotsOn.size;
+			var healWoMastery = this.getNoMasteryHealing(amount, numHotsOn);
+			this.totalNoMasteryHealing += healWoMastery;
+			this.druidSpellNoMasteryHealing += healWoMastery;
+			this.masteryTimesHealing += healWoMastery * numHotsOn;
+			for(hotOn of hotsOn) {
+				if(hotOn != spellId) { // prevents double count
+					this.hotHealingMap.get(hotOn).mastery +=
+							this.getOneStackMasteryHealing(amount, numHotsOn);
+				}
 			}
+		} else { // spell not boosted by mastery
+			this.totalNoMasteryHealing += amount;
 		}
+		
+		
 	}
 	
 	// parse 'absorbed' event
@@ -217,10 +253,14 @@ function RestoDruidSubAnalyzer ( playerName, playerInfo ) {
 				.appendTo(res);
 				
 		// add report for avg HoT stacks
-		var avgMasteryStacks = this.masteryTimesHealing / this.totalNoMasteryHealing;
-		avgMasteryStacks = Math.round(avgMasteryStacks * 100) / 100;
+		var avgTotalMasteryStacks = this.masteryTimesHealing / this.totalNoMasteryHealing;
+		avgTotalMasteryStacks = Math.round(avgTotalMasteryStacks * 100) / 100;
+		var avgDruidSpellMasteryStacks = this.masteryTimesHealing / this.druidSpellNoMasteryHealing;
+		avgDruidSpellMasteryStacks = Math.round(avgDruidSpellMasteryStacks * 100) / 100;
 		$('<li>', {"class":"list-group-item small"})
-				.html("Average Mastery Stacks: <b>" + avgMasteryStacks + "</b>")
+				.html("Average Mastery Stacks<br>" +
+						"&emsp;All Healing: <b>" + avgTotalMasteryStacks + "</b><br>" +
+						"&emsp;Druid Spells: <b>" + avgDruidSpellMasteryStacks + "</b><br>")
 				.appendTo(hotsListElement);
 		
 		// add report for each HoT		
