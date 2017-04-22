@@ -7,7 +7,7 @@ $(document).ready(function() {
 	$("<div>", {id: "report-div", "class": "form-inline"})
 			.appendTo($("#app-container"));
 			
-	$("<input>", {id: "report-input", "class": "form-control", "placeholder": "Report Code..."})
+	$("<input>", {id: "report-input", "class": "form-control", "placeholder": "Enter Report URL or ID..."})
 			.appendTo($("#report-div"));
 			
 	$("<button>", {id: "report-button", "class": "btn btn-primary"})
@@ -38,7 +38,7 @@ $(document).ready(function() {
 		if(reportCode == null) {
 			console.log( "this doesn't look like a report code" );
 			$('<div>', {"class": "alert alert-danger"})
-					.text("Input isn't a WCL report...")
+					.text("Input isn't a WCL report")
 					.appendTo(fightsDiv);
 			return;
 		} else {
@@ -90,6 +90,7 @@ $(document).ready(function() {
 	function parseReportCode( input ) {
 		var wclUrlRegex = /warcraftlogs\.com\/reports\/([0-9a-zA-Z]*)/;
 		var codeAloneRegex = /^([0-9a-zA-Z]+)$/;
+		console.log("Matching entered report code vs regex: ");
 		
 		var wclUrlMatch = wclUrlRegex.exec(input);
 		console.log(wclUrlMatch);
