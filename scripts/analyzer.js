@@ -18,7 +18,7 @@ function TestAnalyzer () {
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-// MASTER ANALYZER
+// MASTERY ANALYZER
 //
 
 function MasterAnalyzer ( playerNameMapping ) {

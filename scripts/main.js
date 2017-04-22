@@ -117,7 +117,7 @@ $(document).ready(function() {
 		$("#analysis-div").remove();
 		
 		// make new analysis div for generate content
-		var analysisDiv = $("<div>", {id: "analysis-div"})
+		var analysisDiv = $("<div>", {id:"analysis-div"})
 				.appendTo($("#fights-div"));
 		$('<br>').appendTo($("#analysis-div"));
 		
@@ -203,9 +203,21 @@ $(document).ready(function() {
 	function analysisDone( analyzer ) {
 		console.log("analysis done!");
 		deleteProgressBar();
+		
+		var analysisRowDiv = $('<div>', {"class":"row"})
+				.appendTo($("#analysis-div"));
+		var analysisLeftColDiv = $('<div>', {"class":"col-sm-6"})
+				.appendTo(analysisRowDiv);
+		var analysisRightColDiv = $('<div>', {"class":"col-sm-6"})
+				.appendTo(analysisRowDiv);
+		
 		var results = analyzer.getResults();
 		for(var i=0; i<results.length; i++) {
-			results[i].appendTo($("#analysis-div"));
+			if(i%2 == 0) {
+				results[i].appendTo(analysisLeftColDiv);
+			} else {
+				results[i].appendTo(analysisRightColDiv);
+			}
 		}
 	}
 	
