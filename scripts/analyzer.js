@@ -270,8 +270,8 @@ function RestoDruidSubAnalyzer ( playerName, playerInfo ) {
 				continue; // don't include result entry for HoT you never used
 			}
 			
-			var directPercent = roundTo(hotHealingObj.direct / this.totalHealing * 100, 2);
-			var masteryPercent = roundTo(hotHealingObj.mastery / this.totalHealing * 100, 2);		
+			var directPercent = roundTo(hotHealingObj.direct / this.totalHealing * 100, 1);
+			var masteryPercent = roundTo(hotHealingObj.mastery / this.totalHealing * 100, 1);		
 			var hotText = this.getSpellLinkHtml(hotId, this.hots.get(hotId)) + "<br>" +
 					'&emsp;Direct: <b>' + directPercent + "%</b> " +
 					toColorHtml("(" + hotHealingObj.direct.toLocaleString() + ")", this.darkGrayColor) +
