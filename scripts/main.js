@@ -256,9 +256,6 @@ $(document).ready(function() {
 		$("#progress-container").remove();
 	}
 
-	
-	// Utils below, TODO move to utils.js file?
-	
 	function formatFight( fight ) { // expects 'fight' structure from array in report JSON
 		console.log( JSON.stringify(fight) );
 		stringResult = fight.name + " " + getDifficulty(fight) +
@@ -291,20 +288,6 @@ $(document).ready(function() {
 				return "";
 				break;
 		}
-	}
-	
-	function formatTime( timeInMillis ) {
-		var totalSeconds = Math.floor(timeInMillis / 1000);
-		
-		var minutes = Math.floor(totalSeconds / 60);
-		var seconds = totalSeconds - (minutes*60);
-		
-		var result = "" + minutes + ":";
-		if(seconds < 10) {
-			result += "0";
-		}
-		result += seconds;
-		return result;
 	}
 
 });

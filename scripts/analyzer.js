@@ -72,6 +72,9 @@ function RestoDruidSubAnalyzer ( playerName, playerInfo ) {
 	
 	// CONSTANTS (TODO make these actually static?)
 	
+	this.druidOrangeColor = 'ff7d0a';
+	this.darkGrayColor = '888888';
+	
 	// these are the spells that can be boosted by Mastery
 	this.druidHeals = new Map();
 	this.druidHeals.set(8936, "Regrowth");
@@ -244,19 +247,17 @@ function RestoDruidSubAnalyzer ( playerName, playerInfo ) {
 		var res = $('<div>', {"class":"panel panel-default"});
 		
 		var playerNameElement = $('<div>', {"class":"panel-heading"})
-				.text(playerName)
-				.css('color', '#ff7d0a')
-				.css('font-weight', 'bold')
+				.html(toColorHtml("<b>" + playerName + "</br>", this.druidOrangeColor))
 				.appendTo(res);
 		
 		var hotsListElement = $('<ul>', {"class":"list-group"})
 				.appendTo(res);
 				
 		// add report for avg HoT stacks
-		var avgTotalMasteryStacks = this.masteryTimesHealing / this.totalNoMasteryHealing;
-		avgTotalMasteryStacks = Math.round(avgTotalMasteryStacks * 100) / 100;
-		var avgDruidSpellMasteryStacks = this.masteryTimesHealing / this.druidSpellNoMasteryHealing;
-		avgDruidSpellMasteryStacks = Math.round(avgDruidSpellMasteryStacks * 100) / 100;
+		var avgTotalMasteryStacks =
+				roundTo(this.masteryTimesHealing / this.totalNoMasteryHealing, 2);
+		var avgDruidSpellMasteryStacks =
+				roundTo(this.masteryTimesHealing / this.druidSpellNoMasteryHealing, 2);
 		$('<li>', {"class":"list-group-item small"})
 				.html("Average Mastery Stacks<br>" +
 						"&emsp;All Healing: <b>" + avgTotalMasteryStacks + "</b><br>" +
@@ -269,17 +270,24 @@ function RestoDruidSubAnalyzer ( playerName, playerInfo ) {
 				continue; // don't include result entry for HoT you never used
 			}
 			
-			var directPercent = Math.round(hotHealingObj.direct / this.totalHealing * 1000) / 10;
-			var masteryPercent = Math.round(hotHealingObj.mastery / this.totalHealing * 1000) / 10;		
+			var directPercent = roundTo(hotHealingObj.direct / this.totalHealing * 100, 2);
+			var masteryPercent = roundTo(hotHealingObj.mastery / this.totalHealing * 100, 2);		
 			var hotText = this.getSpellLinkHtml(hotId, this.hots.get(hotId)) + "<br>" +
-					"&emsp;Direct: <b>" + directPercent + "%</b><br>" +
-					"&emsp;Mastery: <b>" + masteryPercent + "%</b><br>";
+					'&emsp;Direct: <b>' + directPercent + "%</b> " +
+					toColorHtml("(" + hotHealingObj.direct.toLocaleString() + ")", this.darkGrayColor) +
+					'<br>&emsp;Mastery: <b>' + masteryPercent + "%</b> " +
+					toColorHtml("(" + hotHealingObj.mastery.toLocaleString() + ")", this.darkGrayColor);
 			console.log(hotText);
 			
 			$('<li>', {"class":"list-group-item small"})
 				.html(hotText)
 				.appendTo(hotsListElement);
 		}
+		
+		// report raw total healing done
+		$('<li>', {"class":"list-group-item small"})
+				.html(toColorHtml("Total Healing: " + this.totalHealing.toLocaleString(), this.darkGrayColor))
+				.appendTo(hotsListElement);
 		
 		return res;
 	}
