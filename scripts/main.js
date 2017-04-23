@@ -1,6 +1,8 @@
 $(document).ready(function() {
 	console.log("document ready!");
 	
+	// This is my (Sref's) public api key.
+	// WCL documentation implies these are inteded for use with webapps, so this should be fine.
 	var apiKey = "230d616c242ecbd6e2bfc07c4593d485";
 	
 	// init initial app elements: input for report code, and button to dispatch query
