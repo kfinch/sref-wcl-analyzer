@@ -8,7 +8,7 @@
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.0/jquery.min.js"></script>
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
   <script type="text/javascript" src="//wow.zamimg.com/widgets/power.js"></script>
-  <script>var wowhead_tooltips = { "colorlinks": true, "iconizelinks": true, "renamelinks": true }</script>
+  <script>var wowhead_tooltips = { "colorlinks": true, "iconizelinks": true, "renamelinks": false }</script>
   <!-- TODO: use a loader below instead... -->
   <script src="scripts/utils.js"></script>
   <script src="scripts/sub-analyzers/resto-druid-analyzer.js"></script>
@@ -48,9 +48,15 @@
         <p>Calculates how much of your healing can be attributed to each of your HoT's mastery stacks. For example, if you took the talent <a href="http://www.wowhead.com/spell=200390/cultivation">Cultivation</a>, healing from your <i>other</i> spells on a target with your Cultivation on it will heal for more because of the extra mastery stack provided by Cultivation. This is healing that wouldn't have happened had you not specced Cultivation, but it's completely invisible in basic logs. This analyzer seeks to remedy the issue.</p>
 		<p>Results are presented as a percentage of your total healing done over the encounter, including from trinkets / legendaries. 'Direct' healing amounts should correspond to the numbers you see in the WCL report itself.</p>
         <p>Oh, and yes: <a href="http://www.wowhead.com/spell=22842/frenzied-regeneration">Frenzied Regeneration</a> does count towards mastery for whatever reason.</p>
+		<p><u>Mastery Procs</u></p>
+		<p>Calculates healing attributable to certain mastery stacks, presented as a percentage of total healing. Current Mastery procs supported are the <a href="http://www.wowhead.com/spell=232378/astral-harmony">T19 2 piece bonus</a> and the <a href="http://www.wowhead.com/spell=224149/jacins-ruse">Jacin's Ruse set bonus.</a></p>
       </div>
 	  <div class="well text-justify">
 		<h4>Changelog</h4>
+		<h5>4/24/2017</h5>
+		<ul>
+          <li>Added entries for healing attributable to the T19 2 piece and to Jacin's Ruse</li>
+        </ul>
 		<h5>4/22/2017</h5>
 		<ul>
           <li>Added raw healing numbers and avg mastery stacks, improved data presentation.</li>
