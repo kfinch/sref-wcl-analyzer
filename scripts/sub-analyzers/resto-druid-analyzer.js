@@ -47,8 +47,8 @@ function RestoDruidSubAnalyzer ( playerName, playerInfo ) {
 	this.hots.set(33763, "Lifebloom");
 	this.hots.set(22842, "Frenzied Regeneration"); // yes, it actually counts towards mastery -_-
 	
-	this.masteryBuffs = new Map();
-	this.masteryBuffs.set(232378, 4000); // this is the t19 2pc
+	this.masteryBuffs = new Map(); // map from buff ID to obj with buff name and buff strength
+	this.masteryBuffs.set(232378, {'amount':4000, 'name':'T19 2pc'});
 	// TODO: any other common buffs to add? What will I do about varying buff strength by item ilevel?
 	
 	this.baseMasteryPercent = 4.8;
@@ -70,7 +70,13 @@ function RestoDruidSubAnalyzer ( playerName, playerInfo ) {
 	
 	this.hotsOnTarget = new Map(); // map from player ID to a set of hot IDs
 	this.baseMasteryRating = playerInfo.mastery;
-	this.masteryBuffsActive = new Map(); // map from buff ID to buff strength
+	this.masteryBuffsActive = new Map(); // map from buff ID to obj with buff name and buff strength
+	
+	// TODO: 3 maps just for the mastery buff? Make this implementation suck less.
+	this.masteryBuffAccum = new Map(); // map from buff ID to obj with buff name and healing attributable to it
+	for(var[buffId, buffObj] of this.masteryBuffs.entries()) {
+		this.masteryBuffAccum.set(buffId, {'attributableHealing':0, 'name':buffObj.name});
+	}
 	
 	/*
 	 * Methodology:
@@ -156,12 +162,22 @@ function RestoDruidSubAnalyzer ( playerName, playerInfo ) {
 			this.totalNoMasteryHealing += healWoMastery;
 			this.druidSpellNoMasteryHealing += healWoMastery;
 			this.masteryTimesHealing += healWoMastery * numHotsOn;
+			
+			// give each HoT credit for mastery boosting
 			for(hotOn of hotsOn) {
 				if(hotOn != spellId) { // prevents double count
 					this.hotHealingMap.get(hotOn).mastery +=
 							this.getOneStackMasteryHealing(amount, numHotsOn);
 				}
 			}
+			
+			// attribute healing to mastery buffs that are present
+			for(var[buffId, buffObj] of this.masteryBuffsActive.entries()) {
+				var attributableHealing = this.getBuffMasteryHealing(
+						amount, numHotsOn, buffObj.amount);
+				this.masteryBuffAccum.get(buffId).attributableHealing += attributableHealing;
+			}
+			
 		} else { // spell not boosted by mastery
 			this.totalNoMasteryHealing += amount;
 		}
@@ -201,6 +217,7 @@ function RestoDruidSubAnalyzer ( playerName, playerInfo ) {
 		// add report for each HoT		
 		for(var [hotId, hotHealingObj] of this.hotHealingMap.entries()) {
 			if(hotHealingObj.direct == 0) {
+				console.log("No healing from hot ID " + hotId);
 				continue; // don't include result entry for HoT you never used
 			}
 			
@@ -217,6 +234,23 @@ function RestoDruidSubAnalyzer ( playerName, playerInfo ) {
 				.html(hotText)
 				.appendTo(hotsListElement);
 		}
+		
+		// add report for each buff
+		for(var [buffId, buffObj] of this.masteryBuffAccum.entries()) {
+			if(buffObj.attributableHealing == 0) {
+				console.log("No healing from buff ID " + buffId);
+				continue; // don't include result entry for buff that never procced / gave bonus
+			}
+			
+			var amountPercent = roundTo(buffObj.attributableHealing / this.totalHealing * 100, 1);
+			var buffText = getSpellLinkHtml(buffId, buffObj.name) + ": <b>" + amountPercent + "%</b> " +
+					toColorHtml("(" + buffObj.attributableHealing.toLocaleString() + ")", this.darkGrayColor);
+			console.log(buffText);
+			
+			$('<li>', {"class":"list-group-item small"})
+				.html(buffText)
+				.appendTo(hotsListElement);
+		} 
 		
 		// report raw total healing done
 		$('<li>', {"class":"list-group-item small"})
@@ -247,11 +281,18 @@ function RestoDruidSubAnalyzer ( playerName, playerInfo ) {
 		return Math.round(healAmount / healMasteryMultiply);
 	}
 	
+	// the amount of healing attributable to a mastery buff
+	this.getBuffMasteryHealing = function( healAmount, hotCount, buffAmount) {
+		var noMasteryHeal = this.getNoMasteryHealing(healAmount, hotCount);
+		var masteryBonusFromBuff = (buffAmount / this.masteryRatingPerOne) / 100;
+		return Math.round(noMasteryHeal * masteryBonusFromBuff * hotCount);
+	}
+	
 	// uses curr mastery rating (including buffs), and calcs mastery % from it
 	this.getCurrMastery = function() {
 		var currMasteryRating = this.baseMasteryRating;
 		for(masteryBuff of this.masteryBuffsActive.values()) {
-			currMasteryRating += masteryBuff;
+			currMasteryRating += masteryBuff.amount;
 		}
 		
 		return this.masteryRatingToBonus(currMasteryRating);
