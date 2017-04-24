@@ -211,12 +211,13 @@ function RestoDruidSubAnalyzer ( playerName, playerInfo ) {
 		var avgDruidSpellMasteryStacks =
 				roundTo(this.masteryTimesHealing / this.druidSpellNoMasteryHealing, 2);
 		$('<li>', {"class":"list-group-item small"})
-				.html("Average Mastery Stacks<br>" +
+				.html("<p><b>Average Mastery Stacks</b></p>" +
 						"&emsp;All Healing: <b>" + avgTotalMasteryStacks + "</b><br>" +
 						"&emsp;Druid Spells: <b>" + avgDruidSpellMasteryStacks + "</b><br>")
 				.appendTo(hotsListElement);
 		
-		// add report for each HoT		
+		// add report for each HoT
+		var hotText = "<p><b>HoT Mastery Contributions</b></p>";
 		for(var [hotId, hotHealingObj] of this.hotHealingMap.entries()) {
 			if(hotHealingObj.direct == 0) {
 				console.log("No healing from hot ID " + hotId);
@@ -225,34 +226,37 @@ function RestoDruidSubAnalyzer ( playerName, playerInfo ) {
 			
 			var directPercent = roundTo(hotHealingObj.direct / this.totalHealing * 100, 1);
 			var masteryPercent = roundTo(hotHealingObj.mastery / this.totalHealing * 100, 1);		
-			var hotText = getSpellLinkHtml(hotId, this.hots.get(hotId)) + "<br>" +
-					'&emsp;Direct: <b>' + directPercent + "%</b> " +
+			hotText += "<p>&emsp;" + getSpellLinkHtml(hotId, this.hots.get(hotId)) +
+					'<br>&emsp;&emsp;Direct: <b>' + directPercent + "%</b> " +
 					toColorHtml("(" + hotHealingObj.direct.toLocaleString() + ")", this.darkGrayColor) +
-					'<br>&emsp;Mastery: <b>' + masteryPercent + "%</b> " +
-					toColorHtml("(" + hotHealingObj.mastery.toLocaleString() + ")", this.darkGrayColor);
-			console.log(hotText);
-			
-			$('<li>', {"class":"list-group-item small"})
+					'<br>&emsp;&emsp;Mastery: <b>' + masteryPercent + "%</b> " +
+					toColorHtml("(" + hotHealingObj.mastery.toLocaleString() + ")", this.darkGrayColor) +
+					"</p>";
+		}
+		$('<li>', {"class":"list-group-item small"})
 				.html(hotText)
 				.appendTo(hotsListElement);
-		}
 		
 		// add report for each buff
+		var hasProc = false;
+		var procText = "<p><b>Mastery Procs</b></p>";
 		for(var [buffId, buffObj] of this.masteryBuffAccum.entries()) {
 			if(buffObj.attributableHealing == 0) {
 				console.log("No healing from buff ID " + buffId);
 				continue; // don't include result entry for buff that never procced / gave bonus
 			}
+			hasProc = true;
 			
 			var amountPercent = roundTo(buffObj.attributableHealing / this.totalHealing * 100, 1);
-			var buffText = getSpellLinkHtml(buffId, buffObj.name) + ": <b>" + amountPercent + "%</b> " +
-					toColorHtml("(" + buffObj.attributableHealing.toLocaleString() + ")", this.darkGrayColor);
-			console.log(buffText);
-			
-			$('<li>', {"class":"list-group-item small"})
-				.html(buffText)
-				.appendTo(hotsListElement);
+			procText += "&emsp;" + getSpellLinkHtml(buffId, buffObj.name) + ": <b>" + amountPercent + "%</b> " +
+					toColorHtml("(" + buffObj.attributableHealing.toLocaleString() + ")", this.darkGrayColor) +
+					"<br>";
 		} 
+		if(hasProc) {
+			$('<li>', {"class":"list-group-item small"})
+				.html(procText)
+				.appendTo(hotsListElement);
+		}
 		
 		// report raw total healing done
 		$('<li>', {"class":"list-group-item small"})
