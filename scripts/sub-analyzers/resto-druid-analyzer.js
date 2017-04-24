@@ -49,7 +49,7 @@ function RestoDruidSubAnalyzer ( playerName, playerInfo ) {
 	
 	this.masteryBuffs = new Map(); // map from buff ID to obj with buff name and buff strength
 	this.masteryBuffs.set(232378, {'amount':4000, 'name':'T19 2pc'});
-	this.masteryBuffs.set(224148, {'amount':3000, 'name':"Jacin's Ruse"});
+	this.masteryBuffs.set(224149, {'amount':3000, 'name':"Jacin's Ruse"});
 	
 	// TODO: any other common buffs to add? What will I do about varying buff strength by item ilevel?
 	
