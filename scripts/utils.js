@@ -32,3 +32,10 @@ function toColorHtml( html, hexColor) {
 	return '<font color="#' + hexColor + '">' +
 			html + '</font>';
 }
+
+/*
+ * Given a WoW spell's ID and name, builds a wowhead link to it
+ */
+function getSpellLinkHtml( spellId, spellName) {
+	return '<a href="http://www.wowhead.com/spell=' + spellId + '">' + spellName + '</a>';
+}
