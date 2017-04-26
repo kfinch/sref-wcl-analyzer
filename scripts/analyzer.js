@@ -38,8 +38,12 @@ function MasterAnalyzer ( playerNameMapping ) {
 		// each spec has a semi arbitrary ID
 		// see: http://wowwiki.wikia.com/wiki/SpecializationID
 		if( combatantinfo.specID == 105 ) {
+			console.log("Resto Druid:");
+			console.log(combatantinfo);
 			this.subAnalyzers.push(new RestoDruidSubAnalyzer(name, combatantinfo));
 		} else if( combatantinfo.specID == 103 ) { 
+			console.log("Feral Druid:");
+			console.log(combatantinfo);
 			// keep this line commented in production until Feral analyzer implemented
 			//this.subAnalyzers.push(new FeralDruidSubAnalyzer(name, combatantinfo));
 		} else {

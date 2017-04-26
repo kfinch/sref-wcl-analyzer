@@ -61,13 +61,18 @@ $(document).ready(function() {
 					.data("reportCode", reportCode) // for retrieve at analysis time
 					.data("reportData", report)
 					.appendTo(fightsDiv);
-			$(report.fights).each(function() {
-				if(this.boss != 0) { // bosses only
-					$("<option>")
-							.text(formatFight(this))
-							.data("fight", this) // attach fight object to option
-							.appendTo(fightSelect);
-				}
+					
+			// add fights
+			var includedFights = $(report.fights).filter(function() { return this.boss != 0; });
+			if(includedFights.length == 0) {
+				console.log("No boss fights, including all fights");
+				includedFights = $(report.fights);
+			}
+			includedFights.each(function() {
+				$("<option>")
+						.text(formatFight(this))
+						.data("fight", this) // attach fight object to option
+						.appendTo(fightSelect);
 			});
 			
 			// add analyze button
@@ -262,6 +267,11 @@ $(document).ready(function() {
 		console.log( JSON.stringify(fight) );
 		stringResult = fight.name + " " + getDifficulty(fight) +
 				" (" + formatTime(fight.end_time - fight.start_time) + ")";
+		if (fight.boss == 0) {
+			console.log(stringResult);
+			return stringResult;
+		}
+		
 		if( fight.kill ) {
 			stringResult += " (KILL)";
 		} else {
