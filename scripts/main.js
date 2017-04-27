@@ -139,7 +139,7 @@ $(document).ready(function() {
 		console.log( JSON.stringify(selectedOption.data("fight")) );
 		
 		// init analyzer
-		var analyzer = new MasterAnalyzer( getPlayerNameMapping( reportData ) );
+		var analyzer = new MasterAnalyzer( getPlayerNameMapping( reportData ), fightInfo );
 		
 		initProgressBar();
 		
@@ -172,8 +172,9 @@ $(document).ready(function() {
 		var url = "https://www.warcraftlogs.com/v1/report/events/" + reportCode +
 		    "?api_key=" + apiKey +
 		    "&start=" + currTime +
-		    "&end=" + endTime;
-		console.log("fetching event page json from " + url);
+		    "&end=" + endTime +
+			"&actorclass=Druid"; // perf improvement as long as we only care about druid events
+		//console.log("fetching event page json from " + url);
 		
 		var pageReq = $.getJSON(url)
 		.done(function(data) {

@@ -2,7 +2,7 @@
 // RESTO DRUID ANALYZER
 ///////////////////////////////////////////////////////////////////////////////
 
-function RestoDruidSubAnalyzer ( playerName, playerInfo ) {
+function RestoDruidSubAnalyzer ( playerName, playerInfo, fight ) {
 	
 	// CONSTANTS (TODO make these actually static?)
 	
