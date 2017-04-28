@@ -2,7 +2,7 @@
 // RESTO DRUID ANALYZER
 ///////////////////////////////////////////////////////////////////////////////
 
-function RestoDruidSubAnalyzer ( playerName, playerInfo, fight ) {
+function RestoDruidSubAnalyzer ( playerName, playerInfo, fight, enemyNameMapping ) {
 	
 	// CONSTANTS (TODO make these actually static?)
 	
@@ -199,7 +199,7 @@ function RestoDruidSubAnalyzer ( playerName, playerInfo, fight ) {
 		var res = $('<div>', {"class":"panel panel-default"});
 		
 		var playerNameElement = $('<div>', {"class":"panel-heading"})
-				.html(toColorHtml("<b>" + playerName + "</br>", this.druidOrangeColor))
+				.html(toColorHtml("<b>" + playerName + " 🍂</br>", this.druidOrangeColor))
 				.appendTo(res);
 		
 		var hotsListElement = $('<ul>', {"class":"list-group"})

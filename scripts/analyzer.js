@@ -2,7 +2,7 @@
 // MASTER ANALYZER
 ///////////////////////////////////////////////////////////////////////////////
 
-function MasterAnalyzer ( playerNameMapping, fight ) {
+function MasterAnalyzer ( playerNameMapping, enemyNameMapping, fight ) {
 	
 	this.subAnalyzers = [];
 	
@@ -40,12 +40,12 @@ function MasterAnalyzer ( playerNameMapping, fight ) {
 		if( combatantinfo.specID == 105 ) {
 			console.log("Resto Druid:");
 			console.log(combatantinfo);
-			this.subAnalyzers.push(new RestoDruidSubAnalyzer(name, combatantinfo, fight));
+			this.subAnalyzers.push(new RestoDruidSubAnalyzer(name, combatantinfo, fight, enemyNameMapping));
 		} else if( combatantinfo.specID == 103 ) { 
 			console.log("Feral Druid:");
 			console.log(combatantinfo);
 			// keep this line commented in production until Feral analyzer implemented
-			this.subAnalyzers.push(new FeralDruidSubAnalyzer(name, combatantinfo, fight));
+			this.subAnalyzers.push(new FeralDruidSubAnalyzer(name, combatantinfo, fight, enemyNameMapping));
 		} else {
 			this.subAnalyzers
 		}

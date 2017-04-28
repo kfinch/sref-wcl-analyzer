@@ -2,7 +2,7 @@
 // FERAL DRUID ANALYZER
 ///////////////////////////////////////////////////////////////////////////////
 
-function FeralDruidSubAnalyzer ( playerName, playerInfo, fight ) { // TODO will probably need encounterend time 
+function FeralDruidSubAnalyzer ( playerName, playerInfo, fight, enemyNameMapping ) {
 	
 	// CONSTANTS
 	
@@ -12,19 +12,26 @@ function FeralDruidSubAnalyzer ( playerName, playerInfo, fight ) { // TODO will 
 	// number of simulations to run to get AB average
 	this.numSims = 10000;
 	
-	
 	// relevent spell IDs
 	this.ripId = 1079;
 	this.abId = 210705;
 	this.fbId = 22568;
 	
+	// handled on 'cast'
 	this.cpIds = new Set();
 	this.cpIds.add(1822); // rake
-	//this.cpIds.add(106830); // cat thrash
-	this.cpIds.add(210722); // af (cast? do i need look for cast event?)
+	this.cpIds.add(210722); // af
 	this.cpIds.add(5221); // shred
-	//this.cpIds.add(106785); // swipe
 	this.cpIds.add(8921); // moonfire
+	
+	// handled on 'damage'
+	this.directAoeCpIds = new Set();
+	this.directAoeCpIds.add(106785); // cat swipe
+	this.directAoeCpIds.add(202028) // BrS
+	
+	// handled on 'applydebuff' and 'refreshdebuff'
+	this.dotAoeCpIds = new Set();
+	this.dotAoeCpIds.add(106830); // cat thrash
 	
 	// INSTANCE VARS
 	
@@ -47,11 +54,12 @@ function FeralDruidSubAnalyzer ( playerName, playerInfo, fight ) { // TODO will 
 	 * TODO 
 	 */
 	this.parse = function( wclEvent ) {
+		let targetId = this.getUniqueTargetId(wclEvent); // may be undefined
+		let timestamp = wclEvent.timestamp;
+		
 		if(wclEvent.type == 'cast') {
-			console.log("Cast: " + wclEvent.ability.name + " @ " + wclEvent.timestamp);
+			//console.log("Cast: " + wclEvent.ability.name + " @ " + wclEvent.timestamp);
 			let spellId = wclEvent.ability.guid;
-			let targetId = wclEvent.targetID;
-			let timestamp = wclEvent.timestamp;
 			
 			if(targetId === undefined) {
 				return;
@@ -59,69 +67,98 @@ function FeralDruidSubAnalyzer ( playerName, playerInfo, fight ) { // TODO will 
 			
 			// add a new target on Rip
 			if(spellId == this.ripId && !this.targets.has(targetId)) {
-				this.targets.set(targetId, new FdsaTargetState(this.numSims));
+				console.log("Rip on new target: ");
+				console.log(wclEvent);
+				this.targets.set(targetId, new FdsaTargetState(this.numSims, this.ripDuration));
 			}
 			
 			if(this.targets.has(targetId)) {
 				let thisTargetState = this.targets.get(targetId);
 				if(spellId == this.ripId) {
-					thisTargetState.applyRip(timestamp, timestamp + this.ripDuration, this.ripPandemic);
+					console.log("Rip hit on " + targetId + " @" + Math.round(timestamp/1000));
+					thisTargetState.applyRip(timestamp);
 				} else if(this.cpIds.has(spellId)) {
+					console.log("ST CP hit on " + targetId + " @" + Math.round(timestamp/1000));
 					thisTargetState.applyCp(timestamp);
 				}
 			}
 			
 		} else if(wclEvent.type == 'applydebuff') {
-			console.log("Apply Debuff: " + wclEvent.ability.name + " @ " + wclEvent.timestamp);
+			//console.log("Apply Debuff: " + wclEvent.ability.name + " @ " + wclEvent.timestamp);
 			this.applyDebuff(wclEvent);
 			
 		} else if(wclEvent.type == 'refreshdebuff') {
-			console.log("Refresh Debuff: " + wclEvent.ability.name + " @ " + wclEvent.timestamp);
+			//console.log("Refresh Debuff: " + wclEvent.ability.name + " @ " + wclEvent.timestamp);
 			this.applyDebuff(wclEvent);
 			
-		} else if(wclEvent.type == 'damage') { // check FB, has to be on damage so I know target's health
-			console.log("Damage: " + wclEvent.ability.name + " @ " + wclEvent.timestamp);
+		// we only get events for the player, so we don't see mob deaths (and so don't know when to end simmed dots early)
+		// we proxy for this by looking for Rip falling off. If Rip falls before AB scheduled to, must be mob death.
+		} else if(wclEvent.type == 'removedebuff') {
+			//console.log("Remove Debuff: " + wclEvent.ability.name + " @ " + wclEvent.timestamp);
 			let spellId = wclEvent.ability.guid;
-			let targetId = wclEvent.targetID;
-			let timestamp = wclEvent.timestamp;
+			if(this.targets.has(targetId) && spellId == this.ripId) {
+				this.targets.get(targetId).handleDeath(timestamp);
+			}
+			
+			
+		} else if(wclEvent.type == 'damage') { // check FB, has to be on damage so I know target's health
+			//console.log("Damage: " + wclEvent.ability.name + " @ " + wclEvent.timestamp);
+			let spellId = wclEvent.ability.guid;
 			if(this.targets.has(targetId)) {
 				let thisTargetState = this.targets.get(targetId);
 				let targetHpPercentBefore = (wclEvent.hitPoints + wclEvent.amount) / wclEvent.maxHitPoints;
 				if(spellId == this.fbId && (this.hasSabertooth || targetHpPercentBefore < this.noSabertoothRefreshPercent)) {
-					thisTargetState.refreshRip(timestamp, timestamp + this.ripDuration, this.ripPandemic);
+					thisTargetState.refreshRip(timestamp);
+				}
+				
+				if(this.directAoeCpIds.has(spellId)) {
+					console.log("Swipe hit on " + targetId + " @" + Math.round(timestamp/1000));
+					thisTargetState.applyCp(timestamp);
 				}
 			}
 		}
 	}
 	
 	this.applyDebuff = function( wclEvent ) {
-		let targetId = wclEvent.targetID;
+		let targetId = this.getUniqueTargetId(wclEvent);
 		let spellId = wclEvent.ability.guid;
 		let timestamp = wclEvent.timestamp;
 		if(this.targets.has(targetId)) {
 			let thisTargetState = this.targets.get(targetId);
 			if(spellId == this.abId) {
 				thisTargetState.applyAb(timestamp);
+			} else if(this.dotAoeCpIds.has(spellId)) {
+				console.log("Thrash hit on " + targetId + " @" + Math.round(timestamp/1000));
+				thisTargetState.applyCp(timestamp);
 			}
 		}
+	}
+	
+	// Gets a unique string ID for an enemy target.
+	// Enemies with same name have same targetID, must be distinguished by targetInstance.
+	this.getUniqueTargetId = function( wclEvent ) {
+		var res = wclEvent.targetID;
+		if(wclEvent.targetInstance !== undefined) {
+			res += "-" + wclEvent.targetInstance;
+		}
+		return res;
 	}
 	
 	this.getResult = function() {
 		var res = $('<div>', {"class":"panel panel-default"});
 		
 		var playerNameElement = $('<div>', {"class":"panel-heading"})
-				.html(toColorHtml("<b>" + playerName + "</b>", this.druidOrangeColor) +
-						toColorHtml("<b>  Experimental Feral Analysis</b>", 'ff0000'))
+				.html(toColorHtml("<b>" + playerName + " 🐱</b>", this.druidOrangeColor))
 				.appendTo(res);
 		var targetListElement = $('<ul>', {"class":"list-group"})
 				.appendTo(res);
 				
 		for(let[targetId, targetState] of this.targets.entries()) {
-			console.log("Report for Target ID " + targetId);
+			console.log(this.getTargetName(targetId));
 			let reportObj = targetState.report(fight.start_time, fight.end_time);
 			
 			$('<li>', {"class":"list-group-item small"})
-					.html("<p><b>Target ID " + targetId + "</b></p>" +
+					.html("<p><b>" + this.getTargetName(targetId) + "</b></p>" +
 							"&emsp;Actual Rip Uptime: <b>" + reportObj.actualRipUptime + "%</b><br>" +
 							"&emsp;Average Simmed AB Uptime: <b>" + reportObj.simmedAvgAbUptime + "%</b><br>" +
 							"&emsp;Actual AB Uptime: <b>" + reportObj.actualAbUptime +
@@ -132,13 +169,27 @@ function FeralDruidSubAnalyzer ( playerName, playerInfo, fight ) { // TODO will 
 		return res;
 	}
 	
+	// target mapping key is 'id-instance', this unpacks that
+	this.getTargetName = function( targetId ) {
+		console.log("Target ID to decompose: " + targetId);
+		let idAndInstance = (""+targetId).split('-');
+		let justId = parseInt(idAndInstance[0]);
+		let res = enemyNameMapping.get(justId);
+		if(idAndInstance.length == 2) {
+			res += " (" + idAndInstance[1] + ")";
+		}
+		return res;
+	}
+	
 	
 	
 }
 
 // data structure holds the rip / AB / simmed-AB state of a target
-function FdsaTargetState( numSims ) {
+function FdsaTargetState( numSims, ripDuration ) {
 	this.abChance = 0.1;
+	this.pandemicMult = 0.3;
+	this.maxRipPandemic = ripDuration * this.pandemicMult;
 	
 	this.rip = new FdsaBleedState(true, "Rip");
 	this.ab = new FdsaBleedState(true, "AB");
@@ -147,14 +198,19 @@ function FdsaTargetState( numSims ) {
 		this.simAbs[i] = new FdsaBleedState(false, "");
 	}
 	
-	this.applyRip = function( time, newFallsAt, maxPandemic ) {
-		this.rip.applyPandemic( time, newFallsAt, maxPandemic );
+	// handles Rip being applied to target
+	this.applyRip = function( time ) {
+		let newFallsAt = time + ripDuration;
+		this.rip.applyPandemic( time, newFallsAt, this.maxRipPandemic );
 	}
 	
-	this.refreshRip = function( time, newFallsAt, maxPandemic ) { // FB within window
-		this.rip.refreshPandemic( time, newFallsAt, maxPandemic );
+	// handles Rip being refreshed on target, like with FB
+	this.refreshRip = function( time ) { // FB within window
+		let newFallsAt = time + ripDuration;
+		this.rip.refreshPandemic( time, newFallsAt, this.maxRipPandemic );
 	}
 	
+	// handles a CP ability being used on target (anything that could proc AB)
 	this.applyCp = function( time ) {
 		if(this.rip.isBleedUp()) { // CP on target only relevent if Rip is active
 			for(var i=0; i<numSims; i++) {
@@ -165,11 +221,13 @@ function FdsaTargetState( numSims ) {
 		}
 	}
 	
+	// handles an actual AB proc on target
 	this.applyAb = function( time ) {
 		this.rip.update(time);
 		this.ab.apply( time, this.rip.fallsAt );
 	}
 	
+	// handles the target dying (all DoTs drop immediately)
 	this.handleDeath = function( time ) {
 		this.rip.remove(time);
 		this.ab.remove(time);

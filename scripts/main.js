@@ -139,7 +139,8 @@ $(document).ready(function() {
 		console.log( JSON.stringify(selectedOption.data("fight")) );
 		
 		// init analyzer
-		var analyzer = new MasterAnalyzer( getPlayerNameMapping( reportData ), fightInfo );
+		var analyzer = new MasterAnalyzer( getPlayerNameMapping( reportData ),
+				getEnemyNameMapping( reportData ), fightInfo );
 		
 		initProgressBar();
 		
@@ -236,8 +237,20 @@ $(document).ready(function() {
 			playerNameMapping.set(friendly.id, friendly.name);
 		}
 		
+		console.log(playerNameMapping);
 		return playerNameMapping;
 	} 
+	
+	function getEnemyNameMapping( reportData ) {
+		var enemyNameMapping = new Map();
+		
+		for( enemy of reportData.enemies ) {
+			enemyNameMapping.set(enemy.id, enemy.name);
+		}
+		
+		console.log(enemyNameMapping);
+		return enemyNameMapping;
+	}
 	
 	/*
 	 * Progress Bar handling functions
@@ -256,7 +269,7 @@ $(document).ready(function() {
 		var totalTimeInFight = endTime - startTime;
 		var currTimeInFight = currTime - startTime;
 		var currPercent = Math.round(currTimeInFight / totalTimeInFight * 100);
-		console.log($("#progress-bar").first());
+		//console.log($("#progress-bar").first());
 		$("#progress-bar").attr("aria-valuenow", currPercent).attr("style", "width: " + currPercent + "%");
 	}
 	
