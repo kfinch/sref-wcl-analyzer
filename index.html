@@ -43,7 +43,7 @@
 		<p>Uses your actual ability cast times / targets to calculate your <i>expected</i> <a href="http://www.wowhead.com/spell=210705/ashamanes-rip">Ashamane's Rip</a> uptime. Expected uptime is contrasted with actual uptime from logs. Results are presented for every enemy target you used Rip on. All uptimes are a percentage of the total fight time.</p>
 		<p>The Ashamane's Bite artifact talent can be frustrating because while skill definitely contributes to uptime, the largest factor in an individual fight is pure luck. This analyzer seeks to remove luck from the equation when analyzing logs by letting you see your expected uptime based only on your ability timings.</p>
 		<p>This analyzer should also allow you to rage at your poor proc luck, something which would no doubt otherwise be in short supply.</p>
-		<p><b>SHORTCOMINGS: This analyzer is still <i>experimental</i>, and the code is a mess and needs to be refactored. Calculated Rip uptimes are very slightly off from the WCL reported values and I'm not sure why.</b></p>
+		<p><b>SHORTCOMINGS: This analyzer is still <i>experimental</i>, and the code is a mess and needs to be refactored. Calculated Rip uptimes are very slightly off from the WCL reported values and I'm not sure why. Simulated Thrash / Swipe / BrS can proc AB on multiple targets while this can't actually happen in practice. Swiping multiple targets with Rip is uncommon enough that this shouldn't make a noticable difference in sim. Simulator currently assumes you have t192pc, which is currently a good assumption but it will need to be updated to check in the future.</b></p>
       </div>
       <div class="well text-justify">
         <h4>Resto Druid Analysis</h4>
