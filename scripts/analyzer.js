@@ -2,17 +2,25 @@
 // MASTER ANALYZER
 ///////////////////////////////////////////////////////////////////////////////
 
-function MasterAnalyzer ( playerNameMapping, enemyNameMapping, fight ) {
+class MasterAnalyzer {
 	
-	this.subAnalyzers = [];
+	constructor(playerNameMapping, enemyNameMapping, fight) {
+		this.playerNameMapping = playerNameMapping;
+		this.enemyNameMapping = enemyNameMapping;
+		this.fight = fight;
+		this.subAnalyzers = [];
+		console.log("MasterAnalyzer built!");
+	}
 	
-	// use combatantinfo to build new subanalyzers for players,
-	// and pass events through to subanalyzers for matching player
-	this.parse = function( wclEvent ) {	
+	/*
+	 * Use combatantinfo events to build new subanalyzers for players,
+	 * and pass events through to those subanalyzers when player matches
+	 */
+	parse( wclEvent ) {
 		if( wclEvent.type == 'combatantinfo' ) {
 			this.addSubAnalyzers( wclEvent );
 		} else {
-			for(subAnalyzer of this.subAnalyzers) {
+			for(let subAnalyzer of this.subAnalyzers) {
 				if( wclEvent.sourceID == subAnalyzer.playerId ) {
 					subAnalyzer.parse( wclEvent );
 				}
@@ -20,36 +28,40 @@ function MasterAnalyzer ( playerNameMapping, enemyNameMapping, fight ) {
 		}
 	}
 	
-	// concats subanalyzer results to array and returns
-	this.getResults = function() {
-		var results = [];
-		
-		for(subAnalyzer of this.subAnalyzers) {
+	/*
+	 * Concatenates subanalyzer results and returns them
+	 */
+	getResults() {
+		let results = [];
+		for(let subAnalyzer of this.subAnalyzers) {
 			results.push(subAnalyzer.getResult())
 		}
-		
 		return results;
 	}
 	
-	// register new subanalyzers here
-	this.addSubAnalyzers = function( combatantinfo ) {
-		var name = playerNameMapping.get(combatantinfo.sourceID);
+	/*
+	 * Determines if any subanalyzers should be built for a given combatantinfo,
+	 * and adds them to the subanalyzer list
+	 */
+	addSubAnalyzers( combatantinfo ) {
+		let name = this.playerNameMapping.get(combatantinfo.sourceID);
 		
 		// each spec has a semi arbitrary ID
 		// see: http://wowwiki.wikia.com/wiki/SpecializationID
 		if( combatantinfo.specID == 105 ) {
-			console.log("Resto Druid:");
+			console.log(name + " - Resto Druid");
 			console.log(combatantinfo);
-			this.subAnalyzers.push(new RestoDruidSubAnalyzer(name, combatantinfo, fight, enemyNameMapping));
+			this.subAnalyzers.push(new RestoDruidSubAnalyzer(
+					name, combatantinfo, this.fight, this.enemyNameMapping));
 		} else if( combatantinfo.specID == 103 ) { 
-			console.log("Feral Druid:");
+			console.log(name + " - Feral Druid");
 			console.log(combatantinfo);
 			// keep this line commented in production until Feral analyzer implemented
-			this.subAnalyzers.push(new FeralDruidSubAnalyzer(name, combatantinfo, fight, enemyNameMapping));
+			this.subAnalyzers.push(new FeralDruidSubAnalyzer(
+					name, combatantinfo, this.fight, this.enemyNameMapping));
 		} else {
-			this.subAnalyzers
+			// no analysis for you
 		}
 		// add more subanalyzers here
 	}
-	
 }

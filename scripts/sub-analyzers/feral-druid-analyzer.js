@@ -32,6 +32,7 @@ function FeralDruidSubAnalyzer ( playerName, playerInfo, fight, enemyNameMapping
 	// handled on 'applydebuff' and 'refreshdebuff'
 	this.dotAoeCpIds = new Set();
 	this.dotAoeCpIds.add(106830); // cat thrash
+	// TODO make Thrash only active if player has t19-2pc
 	
 	// INSTANCE VARS
 	

@@ -146,7 +146,7 @@ $(document).ready(function() {
 		
 		// this enters callback loop as pages of data are sequentially fetched and analyzed
 		// analyzers need data to be sequential, so we can't parallelize this without a lot of effort
-		fetchPage( analyzer, reportCode, fightInfo.start_time, fightInfo.start_time, fightInfo.end_time );
+		fetchPage( analyzer, fightInfo, reportCode, fightInfo.start_time, fightInfo.start_time, fightInfo.end_time );
 	}
 	
 	/*
@@ -169,7 +169,7 @@ $(document).ready(function() {
 	/*
 	 * Fetches page of data, hands it off to analyzePage()
 	 */
-	function fetchPage( analyzer, reportCode, startTime, currTime, endTime ) {
+	function fetchPage( analyzer, fightInfo, reportCode, startTime, currTime, endTime ) {
 		var url = "https://www.warcraftlogs.com/v1/report/events/" + reportCode +
 		    "?api_key=" + apiKey +
 		    "&start=" + currTime +
@@ -179,7 +179,7 @@ $(document).ready(function() {
 		
 		var pageReq = $.getJSON(url)
 		.done(function(data) {
-			analyzePage( analyzer, data, reportCode, startTime, currTime, endTime );
+			analyzePage( analyzer, fightInfo, data, reportCode, startTime, currTime, endTime );
 		})
 		.fail(function() {
 			deleteProgressBar();
@@ -194,7 +194,7 @@ $(document).ready(function() {
 	/*
 	 * Analyzes a page of data. If there's more, gets next with fetchPage(). If not calls analysisDone().
 	 */
-	function analyzePage( analyzer, data, reportCode, startTime, currTime, endTime ) {
+	function analyzePage( analyzer, fightInfo, data, reportCode, startTime, currTime, endTime ) {
 		updateProgressBar(startTime, currTime, endTime);
 		
 		var events = data.events;
@@ -203,15 +203,21 @@ $(document).ready(function() {
 		}
 		
 		if ("nextPageTimestamp" in data) {
-			fetchPage(analyzer, reportCode, startTime, data.nextPageTimestamp, endTime);
+			fetchPage(analyzer, fightInfo, reportCode, startTime, data.nextPageTimestamp, endTime);
 		} else {
-			analysisDone(analyzer);
+			analysisDone(analyzer, fightInfo);
 		}
 	}
 	
-	function analysisDone( analyzer ) {
+	function analysisDone( analyzer, fightInfo ) {
 		console.log("analysis done!");
 		deleteProgressBar();
+		
+		var analysisTitleDiv = $('<div>', {"class":"panel panel-default"})
+				.appendTo($("#analysis-div"));
+		var analysisTitleHeader = $('<div>', {"class":"panel-heading text-center"})
+				.html("<b>" + formatFight(fightInfo) + "</b>")
+				.appendTo(analysisTitleDiv);
 		
 		var analysisRowDiv = $('<div>', {"class":"row"})
 				.appendTo($("#analysis-div"));
