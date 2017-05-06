@@ -165,12 +165,6 @@ class RestoDruidSubAnalyzer {
 			amount+= wclEvent.absorbed;
 		}
 		
-		// debugging...
-		if(spellId === 8936) {
-			console.log(this.playerName + " Regrowth for " + amount);
-			console.log(wclEvent);
-		}
-		
 		this.totalHealing += amount;
 		
 		if(this.hotHealingMap.has(spellId)) {
