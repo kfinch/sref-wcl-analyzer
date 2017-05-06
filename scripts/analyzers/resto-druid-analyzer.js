@@ -159,7 +159,17 @@ class RestoDruidSubAnalyzer {
 	heal(wclEvent) {
 		let targetId = wclEvent.targetID;
 		let spellId = wclEvent.ability.guid;
-		let amount = wclEvent.amount;
+		
+		let amount = wclEvent.amount; // doesn't include overheal
+		if(wclEvent.absorbed !== undefined) { // absorbed healing is effective healing
+			amount+= wclEvent.absorbed;
+		}
+		
+		// debugging...
+		if(spellId === 8936) {
+			console.log(this.playerName + " Regrowth for " + amount);
+			console.log(wclEvent);
+		}
 		
 		this.totalHealing += amount;
 		
