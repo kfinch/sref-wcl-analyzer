@@ -4,6 +4,12 @@
 
 function RestoDruidSubAnalyzer ( playerName, playerInfo, fight, enemyNameMapping ) {
 	
+	// temp until made into class, need this for closure reasons
+	this.playerName = playerName;
+	this.playerInfo = playerInfo;
+	this.fight = fight;
+	this.enemyNameMapping = enemyNameMapping;
+	
 	// CONSTANTS (TODO make these actually static?)
 	
 	this.druidOrangeColor = 'ff7d0a';
@@ -58,7 +64,7 @@ function RestoDruidSubAnalyzer ( playerName, playerInfo, fight, enemyNameMapping
 	
 	// INSTANCE VARS
 	
-	this.playerId = playerInfo.sourceID;
+	this.playerId = this.playerInfo.sourceID;
 	
 	this.totalHealing = 0; // total healing from all spells
 	this.totalNoMasteryHealing = 0; // total healing before mastery
@@ -71,7 +77,7 @@ function RestoDruidSubAnalyzer ( playerName, playerInfo, fight, enemyNameMapping
 	}
 	
 	this.hotsOnTarget = new Map(); // map from player ID to a set of hot IDs
-	this.baseMasteryRating = playerInfo.mastery;
+	this.baseMasteryRating = this.playerInfo.mastery;
 	this.masteryBuffsActive = new Map(); // map from buff ID to obj with buff name and buff strength
 	
 	// TODO: 3 maps just for the mastery buff? Make this implementation suck less.
@@ -91,8 +97,9 @@ function RestoDruidSubAnalyzer ( playerName, playerInfo, fight, enemyNameMapping
 	 * Mastery procs (except for t19 2pc) are not accounted for.
 	 */
 	this.parse = function( wclEvent ) {
-		var targetId = wclEvent.targetID;
-		var spellId = wclEvent.ability.guid;
+		if(wclEvent.sourceID !== this.playerId) {
+			return;
+		}
 		
 		switch( wclEvent.type ) {
 			case 'applybuff' :
@@ -199,7 +206,7 @@ function RestoDruidSubAnalyzer ( playerName, playerInfo, fight, enemyNameMapping
 		var res = $('<div>', {"class":"panel panel-default"});
 		
 		var playerNameElement = $('<div>', {"class":"panel-heading"})
-				.html(toColorHtml("<b>" + playerName + " 🍂</br>", this.druidOrangeColor))
+				.html(toColorHtml("<b>" + this.playerName + " 🍂</br>", this.druidOrangeColor))
 				.appendTo(res);
 		
 		var hotsListElement = $('<ul>', {"class":"list-group"})

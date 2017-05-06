@@ -4,6 +4,12 @@
 
 function FeralDruidSubAnalyzer ( playerName, playerInfo, fight, enemyNameMapping ) {
 	
+	// temp until made into class, need this for closure reasons
+	this.playerName = playerName;
+	this.playerInfo = playerInfo;
+	this.fight = fight;
+	this.enemyNameMapping = enemyNameMapping;
+	
 	// CONSTANTS
 	
 	this.druidOrangeColor = 'ff7d0a';
@@ -36,18 +42,18 @@ function FeralDruidSubAnalyzer ( playerName, playerInfo, fight, enemyNameMapping
 	
 	// INSTANCE VARS
 	
-	this.playerId = playerInfo.sourceID;
+	this.playerId = this.playerInfo.sourceID;
 	
 	this.ripDuration = 24 * 1000;
 	
-	if( playerInfo.talents[5].id = 202032 ) { // Jagged Wounds
-		console.log(playerName + " is specced for Jagged Wounds");
+	if( this.playerInfo.talents[5].id = 202032 ) { // Jagged Wounds
+		console.log(this.playerName + " is specced for Jagged Wounds");
 		this.ripDuration = 16 * 1000;
 	}
 	
-	this.hasSabertooth = (playerInfo.talents[5].id == 202031);
+	this.hasSabertooth = (this.playerInfo.talents[5].id == 202031);
 	if(this.hasSabertooth) {
-		console.log(playerName + " is specced for Sabertooth"); // but why are you specced for Sabertooth? >_>
+		console.log(this.playerName + " is specced for Sabertooth"); // but why are you specced for Sabertooth? >_>
 	}
 	
 	this.noSabertoothRefreshPercent = 0.25;
@@ -59,6 +65,10 @@ function FeralDruidSubAnalyzer ( playerName, playerInfo, fight, enemyNameMapping
 	 * TODO 
 	 */
 	this.parse = function( wclEvent ) {
+		if(wclEvent.sourceID !== this.playerId) {
+			return;
+		}
+		
 		let timestamp = wclEvent.timestamp;
 		let targetId = this.getUniqueTargetId(wclEvent); // may be undefined
 		
@@ -128,7 +138,7 @@ function FeralDruidSubAnalyzer ( playerName, playerInfo, fight, enemyNameMapping
 	this.getTargetName = function( targetId ) {
 		let idAndInstance = (""+targetId).split('-');
 		let justId = parseInt(idAndInstance[0]);
-		let res = enemyNameMapping.get(justId);
+		let res = this.enemyNameMapping.get(justId);
 		if(idAndInstance.length == 2) {
 			res += " (" + idAndInstance[1] + ")";
 		}
@@ -139,14 +149,14 @@ function FeralDruidSubAnalyzer ( playerName, playerInfo, fight, enemyNameMapping
 		var res = $('<div>', {"class":"panel panel-default"});
 		
 		var playerNameElement = $('<div>', {"class":"panel-heading"})
-				.html(toColorHtml("<b>" + playerName + " 🐱</b>", this.druidOrangeColor))
+				.html(toColorHtml("<b>" + this.playerName + " 🐱</b>", this.druidOrangeColor))
 				.appendTo(res);
 		var targetListElement = $('<ul>', {"class":"list-group"})
 				.appendTo(res);
 				
 		for(let[targetId, targetState] of this.targets.entries()) {
 			console.log(this.getTargetName(targetId));
-			let reportObj = targetState.report(fight.start_time, fight.end_time);
+			let reportObj = targetState.report(this.fight.start_time, this.fight.end_time);
 			
 			$('<li>', {"class":"list-group-item small"})
 					.html("<p><b>" + this.getTargetName(targetId) + "</b></p>" +
