@@ -1,70 +1,66 @@
-///////////////////////////////////////////////////////////////////////////////
-// FERAL DRUID ANALYZER
-///////////////////////////////////////////////////////////////////////////////
-
-function FeralDruidSubAnalyzer ( playerName, playerInfo, fight, enemyNameMapping ) {
+/**
+ * FERAL DRUID ANALYZER
+ *
+ * Calculates 'expected Ashamane's Rip uptime' given the actual ability usage timings.
+ * Compares this with actual Ashamane's Rip uptime to give an idea of how lucky the player was.
+ */
+class FeralDruidSubAnalyzer {
 	
-	// temp until made into class, need this for closure reasons
-	this.playerName = playerName;
-	this.playerInfo = playerInfo;
-	this.fight = fight;
-	this.enemyNameMapping = enemyNameMapping;
-	
-	// CONSTANTS
-	
-	this.druidOrangeColor = 'ff7d0a';
-	this.darkGrayColor = '888888';
-	
-	// number of simulations to run to get AB average
-	this.numSims = 10000;
-	
-	// relevent spell IDs
-	this.ripId = 1079;
-	this.abId = 210705;
-	this.fbId = 22568;
-	
-	// handled on 'cast'
-	this.cpIds = new Set();
-	this.cpIds.add(1822); // rake
-	this.cpIds.add(210722); // af
-	this.cpIds.add(5221); // shred
-	this.cpIds.add(8921); // moonfire
-	
-	// handled on 'damage'
-	this.directAoeCpIds = new Set();
-	this.directAoeCpIds.add(106785); // cat swipe
-	this.directAoeCpIds.add(202028) // BrS
-	
-	// handled on 'applydebuff' and 'refreshdebuff'
-	this.dotAoeCpIds = new Set();
-	this.dotAoeCpIds.add(106830); // cat thrash
-	// TODO make Thrash only active if player has t19-2pc
-	
-	// INSTANCE VARS
-	
-	this.playerId = this.playerInfo.sourceID;
-	
-	this.ripDuration = 24 * 1000;
-	
-	if( this.playerInfo.talents[5].id = 202032 ) { // Jagged Wounds
-		console.log(this.playerName + " is specced for Jagged Wounds");
-		this.ripDuration = 16 * 1000;
+	constructor(playerName, playerInfo, fight, enemyNameMapping) {
+		this.playerName = playerName;
+		this.playerInfo = playerInfo;
+		this.fight = fight;
+		this.enemyNameMapping = enemyNameMapping;
+		
+		this.druidOrangeColor = 'ff7d0a';
+		this.darkGrayColor = '888888';
+		
+		// number of simulations to run to get AB average
+		this.numSims = 10000;
+		
+		// relevent spell IDs
+		this.ripId = 1079;
+		this.abId = 210705;
+		this.fbId = 22568;
+		
+		// handled on 'cast'
+		this.cpIds = new Set();
+		this.cpIds.add(1822); // rake
+		this.cpIds.add(210722); // af
+		this.cpIds.add(5221); // shred
+		this.cpIds.add(8921); // moonfire
+		
+		// handled on 'damage'
+		this.directAoeCpIds = new Set();
+		this.directAoeCpIds.add(106785); // cat swipe
+		this.directAoeCpIds.add(202028) // BrS
+		
+		// handled on 'applydebuff' and 'refreshdebuff'
+		this.dotAoeCpIds = new Set();
+		this.dotAoeCpIds.add(106830); // cat thrash
+		// TODO make Thrash only active if player has t19-2pc
+		
+		this.playerId = this.playerInfo.sourceID;
+		
+		this.ripDuration = 24 * 1000;
+		
+		if( this.playerInfo.talents[5].id = 202032 ) { // Jagged Wounds
+			console.log(this.playerName + " is specced for Jagged Wounds");
+			this.ripDuration = 16 * 1000;
+		}
+		
+		this.hasSabertooth = (this.playerInfo.talents[5].id == 202031);
+		if(this.hasSabertooth) {
+			console.log(this.playerName + " is specced for Sabertooth"); // but why are you specced for Sabertooth? >_>
+		}
+		
+		this.noSabertoothRefreshPercent = 0.25;
+		
+		this.targets = new Map(); // from ID to FdsaTargetState
 	}
 	
-	this.hasSabertooth = (this.playerInfo.talents[5].id == 202031);
-	if(this.hasSabertooth) {
-		console.log(this.playerName + " is specced for Sabertooth"); // but why are you specced for Sabertooth? >_>
-	}
-	
-	this.noSabertoothRefreshPercent = 0.25;
-	
-	this.targets = new Map(); // from ID to FdsaTargetState
 
-	/*
-	 * Methodology:
-	 * TODO 
-	 */
-	this.parse = function( wclEvent ) {
+	parse(wclEvent) {
 		if(wclEvent.sourceID !== this.playerId) {
 			return;
 		}
@@ -126,8 +122,8 @@ function FeralDruidSubAnalyzer ( playerName, playerInfo, fight, enemyNameMapping
 	
 	// Gets a unique string ID for an enemy target.
 	// Enemies with same name have same targetID, must be distinguished by targetInstance.
-	this.getUniqueTargetId = function( wclEvent ) {
-		var res = wclEvent.targetID;
+	getUniqueTargetId(wclEvent) {
+		let res = wclEvent.targetID;
 		if(wclEvent.targetInstance !== undefined) {
 			res += "-" + wclEvent.targetInstance;
 		}
@@ -135,7 +131,7 @@ function FeralDruidSubAnalyzer ( playerName, playerInfo, fight, enemyNameMapping
 	}
 	
 	// target mapping key is 'id-instance', this unpacks that
-	this.getTargetName = function( targetId ) {
+	getTargetName(targetId) {
 		let idAndInstance = (""+targetId).split('-');
 		let justId = parseInt(idAndInstance[0]);
 		let res = this.enemyNameMapping.get(justId);
@@ -145,13 +141,13 @@ function FeralDruidSubAnalyzer ( playerName, playerInfo, fight, enemyNameMapping
 		return res;
 	}
 	
-	this.getResult = function() {
-		var res = $('<div>', {"class":"panel panel-default"});
+	getResult() {
+		let res = $('<div>', {"class":"panel panel-default"});
 		
-		var playerNameElement = $('<div>', {"class":"panel-heading"})
+		let playerNameElement = $('<div>', {"class":"panel-heading"})
 				.html(toColorHtml("<b>" + this.playerName + " 🐱</b>", this.druidOrangeColor))
 				.appendTo(res);
-		var targetListElement = $('<ul>', {"class":"list-group"})
+		let targetListElement = $('<ul>', {"class":"list-group"})
 				.appendTo(res);
 				
 		for(let[targetId, targetState] of this.targets.entries()) {
@@ -173,34 +169,40 @@ function FeralDruidSubAnalyzer ( playerName, playerInfo, fight, enemyNameMapping
 }
 
 // data structure holds the rip / AB / simmed-AB state of a target
-function FdsaTargetState( numSims, ripDuration ) {
-	this.abChance = 0.1;
-	this.pandemicMult = 0.3;
-	this.maxRipPandemic = ripDuration * this.pandemicMult;
+class FdsaTargetState {
 	
-	this.rip = new FdsaBleedState(true, "Rip");
-	this.ab = new FdsaBleedState(true, "AB");
-	this.simAbs = [numSims];
-	for(var i=0; i<numSims; i++) {
-		this.simAbs[i] = new FdsaBleedState(false, "");
+	constructor(numSims, ripDuration) {
+		this.numSims = numSims;
+		this.ripDuration = ripDuration;
+		
+		this.abChance = 0.1;
+		this.pandemicMult = 0.3;
+		this.maxRipPandemic = ripDuration * this.pandemicMult;
+		
+		this.rip = new FdsaBleedState(true, "Rip");
+		this.ab = new FdsaBleedState(true, "AB");
+		this.simAbs = [numSims];
+		for(let i=0; i<numSims; i++) {
+			this.simAbs[i] = new FdsaBleedState(false, "");
+		}
 	}
 	
 	// handles Rip being applied to target
-	this.applyRip = function( time ) {
-		let newFallsAt = time + ripDuration;
+	applyRip(time) {
+		let newFallsAt = time + this.ripDuration;
 		this.rip.applyPandemic( time, newFallsAt, this.maxRipPandemic );
 	}
 	
 	// handles Rip being refreshed on target, like with FB
-	this.refreshRip = function( time ) { // FB within window
-		let newFallsAt = time + ripDuration;
+	refreshRip(time) { // FB within window
+		let newFallsAt = time + this.ripDuration;
 		this.rip.refreshPandemic( time, newFallsAt, this.maxRipPandemic );
 	}
 	
 	// handles a CP ability being used on target (anything that could proc AB)
-	this.applyCp = function( time ) {
+	applyCp(time) {
 		if(this.rip.isBleedUp()) { // CP on target only relevent if Rip is active
-			for(var i=0; i<numSims; i++) {
+			for(let i=0; i<this.numSims; i++) {
 				if(Math.random() < this.abChance) {
 					this.simAbs[i].apply(time, this.rip.fallsAt);
 				}
@@ -209,13 +211,13 @@ function FdsaTargetState( numSims, ripDuration ) {
 	}
 	
 	// handles an actual AB proc on target
-	this.applyAb = function( time ) {
+	applyAb(time) {
 		this.rip.update(time);
 		this.ab.apply( time, this.rip.fallsAt );
 	}
 	
 	// handles the target dying (all DoTs drop immediately)
-	this.handleDeath = function( time ) {
+	handleDeath(time) {
 		this.rip.remove(time);
 		this.ab.remove(time);
 		for(let simAb of this.simAbs) {
@@ -224,7 +226,7 @@ function FdsaTargetState( numSims, ripDuration ) {
 	}
 	
 	// builds a 'reportobj' with data about Rip, AB, and simmed AB uptimes
-	this.report = function( fightStartTime, fightEndTime ) {
+	report(fightStartTime, fightEndTime) {
 		this.handleDeath(fightEndTime);
 	
 		let fightTime = fightEndTime - fightStartTime;
@@ -243,7 +245,7 @@ function FdsaTargetState( numSims, ripDuration ) {
 		let actualPercentile = Math.round(numSimsBelowActual / this.simAbs.length * 100);
 		console.log("Actual AB percentile: " + actualPercentile);
 		
-		var reportObj = {};
+		let reportObj = {};
 		reportObj.actualRipUptime = roundTo(ripUptime * 100, 1);
 		reportObj.actualAbUptime = roundTo(abUptime * 100, 1);
 		reportObj.simmedAvgAbUptime = roundTo(averageAbSimUptime * 100, 1);
@@ -254,63 +256,69 @@ function FdsaTargetState( numSims, ripDuration ) {
 
 // tracks the state of a bleed
 // evals its state 'lazily', meaning accumDur won't be updated until one of its functions is called
-function FdsaBleedState( isVerbose, name ) {
-	this.bleedUp = false;
-	this.appliedAt = 0; // in millis since log start
-	this.fallsAt = 0; // in millis since log start
-	this.accumDur = 0; // in millis
+class FdsaBleedState {
 	
-	this.isBleedUp = function( time ) {
+	constructor(isVerbose, name) {
+		this.isVerbose = isVerbose;
+		this.name = name;
+		
+		this.bleedUp = false;
+		this.appliedAt = 0; // in millis since log start
+		this.fallsAt = 0; // in millis since log start
+		this.accumDur = 0; // in millis
+	}
+	
+	isBleedUp(time) {
 		this.update(time);
 		return this.bleedUp;
 	}
 	
-	this.update = function( time ) {
+	update(time) {
 		if(this.bleedUp && time > this.fallsAt) {
-			if(isVerbose){console.log(name + " fell @ " + Math.round(this.fallsAt/1000));} // debug logging
+			if(this.isVerbose){console.log(this.name + " fell @ " + Math.round(this.fallsAt/1000));} // debug logging
 			this.bleedUp = false;
 			this.accumDur += (this.fallsAt - this.appliedAt);
 		} 
 	}
 	
-	this.apply = function( time, newFallsAt ) {
+	apply(time, newFallsAt) {
 		this.applyHelper(time, newFallsAt, 0, false);
 	}
 	
-	this.applyPandemic = function( time, newFallsAt, maxPandemic) {
+	applyPandemic(time, newFallsAt, maxPandemic) {
 		this.applyHelper(time, newFallsAt, maxPandemic, false);
 	}
 	
-	this.refresh = function( time, newFallsAt ) {
+	refresh(time, newFallsAt) {
 		this.applyHelper(time, newFallsAt, 0, true);
 	}
 	
-	this.refreshPandemic = function( time, newFallsAt, maxPandemic) {
+	refreshPandemic(time, newFallsAt, maxPandemic) {
 		this.applyHelper(time, newFallsAt, maxPandemic, true);
 	}
 	
-	this.applyHelper = function( time, newFallsAt, maxPandemic, refreshOnly ) {
+	applyHelper(time, newFallsAt, maxPandemic, refreshOnly) {
 		this.update(time);
 		if(this.bleedUp) {
-			var remainingDur = this.fallsAt - time;
+			let remainingDur = this.fallsAt - time;
 			if(remainingDur > maxPandemic) {
 				this.fallsAt = newFallsAt + maxPandemic;
 			} else {
 				this.fallsAt = newFallsAt + remainingDur;
 			}
-			if(isVerbose){console.log(name + " refreshed @ " + Math.round(time/1000));} // debug logging
+			if(this.isVerbose){console.log(this.name + " refreshed @ " + Math.round(time/1000));} // debug logging
 		} else if(!refreshOnly) {
-			if(isVerbose){console.log(name + " applied @ " + Math.round(time/1000));} // debug logging
+			if(this.isVerbose){console.log(this.name + " applied @ " + Math.round(time/1000));} // debug logging
 			this.bleedUp = true;
 			this.appliedAt = time;
 			this.fallsAt = newFallsAt;
 		}
 	}
 	
-	this.remove = function( time ) {
+	remove(time) {
 		this.update(time);
 		if(this.bleedUp) {
-			if(isVerbose){console.log(name + " removed @ " + Math.round(this.fallsAt/1000));} // debug logging
+			if(this.isVerbose){console.log(this.name + " removed @ " + Math.round(this.fallsAt/1000));} // debug logging
 			this.bleedUp = false;
 			this.accumDur += (time - this.appliedAt);
 		}
