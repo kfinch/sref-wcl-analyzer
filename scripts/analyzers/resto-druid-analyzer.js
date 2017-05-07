@@ -101,6 +101,11 @@ class RestoDruidSubAnalyzer {
 	 * Mastery procs (except for t19 2pc) are not accounted for.
 	 */
 	 parse(wclEvent) {
+		 
+		if(wclEvent.type === 'combatantinfo') {
+			this.combatantInfo(wclEvent);
+		}
+		 
 		if(wclEvent.sourceID !== this.playerId) {
 			return;
 		}
@@ -119,6 +124,23 @@ class RestoDruidSubAnalyzer {
 				this.absorbed(wclEvent);
 				break;
 			default :
+		}
+	}
+	
+	// parse 'combatantinfo' event
+	combatantInfo(wclEvent) {	
+		let targetId = wclEvent.sourceID; // aura's target is combatantinfo source
+		
+		// handle prehots
+		for(let aura of wclEvent.auras) {
+			let spellId = aura.ability;
+			let sourceId = aura.source; // aura's source is tracked here
+			// if player put a prehot on target...
+			if(sourceId == this.playerId && this.hots.has(spellId)) {
+				this.addSetIfAbsent(targetId);
+				this.hotsOnTarget.get(targetId).add(spellId);
+				console.log("Player ID " + targetId + " prehotted with " + this.hots.get(spellId));
+			}
 		}
 	}
 	
