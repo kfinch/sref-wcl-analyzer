@@ -35,14 +35,12 @@
     <div class="col-sm-4">
     <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
       <div class="panel panel-default">
-        <div class="panel-heading" role="tab" id="headingOne">
+        <div class="panel-heading" role="tab" data-toggle="collapse" data-parent="" id="usageHeader" href="#usageCollapse" aria-expanded="true" aria-controls="usageCollapse">
           <h4 class="panel-title">
-            <a role="button" data-toggle="collapse" data-parent="" href="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
-              Usage
-            </a>
+			Usage
           </h4>
         </div>
-        <div id="collapseOne" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="headingOne">
+        <div id="usageCollapse" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="usageHeader">
           <div class="panel-body">
             <p>Find a <a href="https://www.warcraftlogs.com/">WarcraftLogs</a> report you'd like to analyze, copy the URL (or just the report code) into the input box, and press the 'Get' button.</p>
             <p>Select the specific fight you'd like to analyze, and press the 'Analyze' button. Analysis may take up to a minute to complete.</p>
@@ -50,14 +48,12 @@
         </div>
       </div>
       <div class="panel panel-default">
-        <div class="panel-heading" role="tab" id="headingTwo">
+        <div class="panel-heading" role="tab" id="restoDruidHeader" data-toggle="collapse" data-parent="" href="#restoDruidCollapse" aria-expanded="false" aria-controls="restoDruidCollapse">
           <h4 class="panel-title">
-            <a class="collapsed" role="button" data-toggle="collapse" data-parent="" href="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
               Resto Druid Analysis
-            </a>
           </h4>
         </div>
-        <div id="collapseTwo" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingTwo">
+        <div id="restoDruidCollapse" class="panel-collapse collapse" role="tabpanel" aria-labelledby="restoDruidHeader">
           <div class="panel-body">
             <p><u>Average Mastery Stacks</u></p>
             <p>Calculates the average number of mastery stacks you benefit from when healing. This average is weighted with respect to healing done (before mastery).</p>
@@ -74,15 +70,12 @@
         </div>
       </div>
       <div class="panel panel-default">
-        <div class="panel-heading" role="tab" id="headingThree">
+        <div class="panel-heading" role="tab" id="feralDruidHeader" data-toggle="collapse" data-parent="" href="#feralDruidCollapse" aria-expanded="false" aria-controls="feralDruidCollapse">
           <h4 class="panel-title">
-            <a class="collapsed" role="button" data-toggle="collapse" data-parent="" href="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
             Feral Druid Analysis
-
-            </a>
           </h4>
         </div>
-        <div id="collapseThree" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingThree">
+        <div id="feralDruidCollapse" class="panel-collapse collapse" role="tabpanel" aria-labelledby="feralDruidHeader">
           <div class="panel-body">
               <p><u>Expected AB Uptime</u></p>
               <p>Uses your actual ability cast times / targets to calculate your <i>expected</i> <a href="http://www.wowhead.com/spell=210705/ashamanes-rip">Ashamane's Rip</a> uptime. Expected uptime is contrasted with actual uptime from logs. Results are presented for every enemy target you used Rip on. All uptimes are a percentage of the total fight time.</p>
@@ -93,43 +86,39 @@
         </div>
       </div>
       <div class="panel panel-default">
-        <div class="panel-heading" role="tab" id="headingFour">
+        <div class="panel-heading" role="tab" id="changelogHeader" data-toggle="collapse" data-parent="" href="#changelogCollapse" aria-expanded="false" aria-controls="changelogCollapse">
           <h4 class="panel-title">
-            <a class="collapsed" role="button" data-toggle="collapse" data-parent="" href="#collapseFour" aria-expanded="false" aria-controls="collapseFour">
             Changelog
-            </a>
           </h4>
         </div>
-        <div id="collapseFour" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingFour">
+        <div id="changelogCollapse" class="panel-collapse collapse" role="tabpanel" aria-labelledby="changelogHeader">
           <div class="panel-body">
               <h5>4/28/2017</h5>
               <ul>
-                    <li>Added Feral Analyzer</li>
-                  </ul>
+				<li>Added Feral Analyzer</li>
+              </ul>
               <h5>4/24/2017</h5>
               <ul>
-                    <li>Added entries for healing attributable to the T19 2 piece and to Jacin's Ruse</li>
-                  </ul>
+				<li>Added entries for healing attributable to the T19 2 piece and to Jacin's Ruse</li>
+              </ul>
               <h5>4/22/2017</h5>
               <ul>
-                    <li>Added raw healing numbers and avg mastery stacks, improved data presentation.</li>
-                  </ul>
+                <li>Added raw healing numbers and avg mastery stacks, improved data presentation.</li>
+              </ul>
               <h5>4/21/2017</h5>
               <ul>
-                    <li>Initial Release</li>
-                  </ul>
-              </div>
-          </div>
+                <li>Initial Release</li>
+              </ul>
+            </div>
+        </div>
         </div>
         <div class="panel panel-default">
-          <div class="panel-heading" role="tab" id="headingFive">
+          <div class="panel-heading" role="tab" id="infoHeader" data-toggle="collapse" data-parent="" href="#infoCollapse" aria-expanded="false" aria-controls="infoCollapse">
             <h4 class="panel-title">
-              <a class="collapsed" role="button" data-toggle="collapse" data-parent="" href="#collapseFive" aria-expanded="false" aria-controls="collapseFive">
               Information
-              </a>
             </h4>
           </div>
-          <div id="collapseFive" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingFive">
+          <div id="infoCollapse" class="panel-collapse collapse" role="tabpanel" aria-labelledby="infoHeader">
             <div class="panel-body">
               <p>UI Layout inspired by the <a href="https://druid-legendary-analyser.herokuapp.com/#">Restoration Druid Legendary Analyser</a>, which is another great WCL analysis tool for Resto Druids.
                <p>Source available <a href="https://github.com/kfinch/sref-rdruid-analyzer">here</a>, and you can contact me with questions or suggestions on Discord : Sref#3865</p>
