@@ -1,19 +1,20 @@
 
 /* Extra styling to add arrows indicating collapse status to collapsible elements */
-.panel-heading[aria-expanded="true"] .panel-title:after {
+[data-toggle="collapse"][aria-expanded="true"] .panel-title:after {
     font-family: 'Glyphicons Halflings';  /* using Bootstrap Glyphicons */
     content: "\e114";    /* down arrow glyph */
     float: right;
     color: grey;
 }
-.panel-heading[aria-expanded="false"] .panel-title:after {
+[data-toggle="collapse"][aria-expanded="false"] .panel-title:after {
 	font-family: 'Glyphicons Halflings';  /* using Bootstrap Glyphicons */
     content: "\e080";    /* right arrow glyph */
 	float: right;
     color: grey;
 }
 
-/* test */
-.panel-heading {
-	color: purple;
+/* iOS / Safari won't recognize these as clickable unless 'cursor: pointer' added */
+[data-toggle="collapse"] {
+	cursor: pointer;
 }
+
