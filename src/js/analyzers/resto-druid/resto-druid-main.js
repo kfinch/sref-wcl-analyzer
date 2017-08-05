@@ -7,7 +7,7 @@
  *		- Mastery benefit conveyed by each resto HoT on all *other* healing
  *		- Effective increase in average healing caused by a few common mastery procs
  */
-class RestoDruidSubAnalyzer {
+class RestoDruidAnalyzer {
 	
 	constructor(playerName, playerInfo, fight, enemyNameMapping) {
 		this.playerName = playerName;

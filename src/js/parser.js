@@ -51,13 +51,13 @@ class ParseWorker {
 			if( combatantInfo.specID == 105 ) {
 				console.log(playerName + " - Resto Druid");
 				console.log(combatantInfo);
-				this.analyzers.push(new RestoDruidSubAnalyzer(
+				this.analyzers.push(new RestoDruidAnalyzer(
 						playerName, combatantInfo, this.fightInfo, this.enemyNameMapping));
 
 			} else if( combatantInfo.specID == 103 ) { 
 				console.log(playerName + " - Feral Druid");
 				console.log(combatantInfo);
-				this.analyzers.push(new FeralDruidSubAnalyzer(
+				this.analyzers.push(new FeralDruidAnalyzer(
 						playerName, combatantInfo, this.fightInfo, this.enemyNameMapping));
 						
 			} else {

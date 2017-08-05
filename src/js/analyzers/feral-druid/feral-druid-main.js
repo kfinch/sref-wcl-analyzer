@@ -4,7 +4,7 @@
  * Calculates 'expected Ashamane's Rip uptime' given the actual ability usage timings.
  * Compares this with actual Ashamane's Rip uptime to give an idea of how lucky the player was.
  */
-class FeralDruidSubAnalyzer {
+class FeralDruidAnalyzer {
 	
 	constructor(playerName, playerInfo, fight, enemyNameMapping) {
 		this.playerName = playerName;
