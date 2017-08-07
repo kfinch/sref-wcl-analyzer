@@ -410,7 +410,7 @@ class RestoDruidAnalyzer {
 		
 		return {'noMastery':noMasteryHealing, 'oneStack':oneStackMasteryHealing, 'oneMastery':oneMastery,
 				'oneCrit':oneCrit, 'oneHasteHpm':oneHasteHpm, 'oneHasteHpct':oneHasteHpct,
-				'oneVers':oneVers, 'oneInt':'oneInt,
+				'oneVers':oneVers, 'oneInt':oneInt,
 				'total':amount, 'hotCount':hotCount};
 	}
 	
