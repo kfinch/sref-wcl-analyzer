@@ -151,6 +151,10 @@ class RestoDruidMasteryAnalyzer {
 		let targetId = wclEvent.targetID;
 		let spellId = wclEvent.ability.guid;
 		
+		if(spellId === 8936) {
+			console.log(wclEvent);
+		}
+		
 		let amount = wclEvent.amount; // doesn't include overheal
 		if(wclEvent.absorbed !== undefined) { // absorbed healing is effective healing
 			amount += wclEvent.absorbed;
