@@ -26,6 +26,11 @@ class RestoDruidAnalyzer {
 		this.baseVersRating = playerInfo.versatilityHealingDone;
 		this.baseInt = playerInfo.intellect;
 		
+		// you get 5% bonus int for wearing all leather
+		// this is accounted for on the base int from combatantinfo,
+		// but is not accounted for in the hypothetical one extra int I'm using to generate weights
+		this.armorIntMultiplier = 1.05;
+		
 		this.critMultiplier = 2;
 		// TODO handle different mults from DoS, Tauren, ???
 		
@@ -34,103 +39,103 @@ class RestoDruidAnalyzer {
 		/*
 		 * A mapping from healing spell ID to the properties of that heal.
 		 * int: does this benefit from int?
-		 * mastery-boost: does this add a mastery stack?
+		 * mastery_boost: does this add a mastery stack?
 		 * mastery: does this benefit from mastery?
 		 * crit: can this crit?
-		 * haste-hpm: is this a HoT that ticks faster with haste?
-		 * haste-hpct: can this be cast more with haste? (i.e. non CD spells)
+		 * haste_hpm: is this a HoT that ticks faster with haste?
+		 * haste_hpct: can this be cast more with haste? (i.e. non CD spells)
 		 * vers: does this benefit from versitility?
 		 */
 		this.heals = new Map();
 		// RG ticks have 'tick: true', for direct that field is undefined
 		this.heals.set(8936, {'name':"Regrowth", // ???? seperate periodic and direct
-				'int':true, 'mastery-boost':true, 'mastery':true,
-				'crit':true, 'haste-hpm':true, 'haste-hpct':true, 'vers':true
+				'int':true, 'mastery_boost':true, 'mastery':true,
+				'crit':true, 'haste_hpm':true, 'haste_hpct':true, 'vers':true
 				});
 		this.heals.set(774, {'name':"Rejuvenation",
-				'int':true, 'mastery-boost':true, 'mastery':true,
-				'crit':true, 'haste-hpm':true, 'haste-hpct':true, 'vers':true
+				'int':true, 'mastery_boost':true, 'mastery':true,
+				'crit':true, 'haste_hpm':true, 'haste_hpct':true, 'vers':true
 				});
 		this.heals.set(155777, {'name':"Germination",
-				'int':true, 'mastery-boost':true, 'mastery':true,
-				'crit':true, 'haste-hpm':true, 'haste-hpct':true, 'vers':true
+				'int':true, 'mastery_boost':true, 'mastery':true,
+				'crit':true, 'haste_hpm':true, 'haste_hpct':true, 'vers':true
 				});
 		this.heals.set(48438, {'name':"Wild Growth",
-				'int':true, 'mastery-boost':true, 'mastery':true,
-				'crit':true, 'haste-hpm':true, 'haste-hpct':false, 'vers':true
+				'int':true, 'mastery_boost':true, 'mastery':true,
+				'crit':true, 'haste_hpm':true, 'haste_hpct':false, 'vers':true
 				});
 		this.heals.set(207386, {'name':"Spring Blossoms",
-				'int':true, 'mastery-boost':true, 'mastery':true,
-				'crit':true, 'haste-hpm':false, 'haste-hpct':false, 'vers':true
+				'int':true, 'mastery_boost':true, 'mastery':true,
+				'crit':true, 'haste_hpm':false, 'haste_hpct':false, 'vers':true
 				});
-		this.heals.set(200389, {'name':"Cultivation", //TODO is haste-hpct: true a reasonable approx?
-				'int':true, 'mastery-boost':true, 'mastery':true,
-				'crit':true, 'haste-hpm':true, 'haste-hpct':true, 'vers':true
+		this.heals.set(200389, {'name':"Cultivation", //TODO is haste_hpct: true a reasonable approx?
+				'int':true, 'mastery_boost':true, 'mastery':true,
+				'crit':true, 'haste_hpm':true, 'haste_hpct':true, 'vers':true
 				});
 		this.heals.set(102352, {'name':"Cenarion Ward",
-				'int':true, 'mastery-boost':true, 'mastery':true,
-				'crit':true, 'haste-hpm':true, 'haste-hpct':false, 'vers':true
+				'int':true, 'mastery_boost':true, 'mastery':true,
+				'crit':true, 'haste_hpm':true, 'haste_hpct':false, 'vers':true
 				});
 		this.heals.set(33763, {'name':"Lifebloom",
-				'int':true, 'mastery-boost':true, 'mastery':true,
-				'crit':true, 'haste-hpm':true, 'haste-hpct':false, 'vers':true
+				'int':true, 'mastery_boost':true, 'mastery':true,
+				'crit':true, 'haste_hpm':true, 'haste_hpct':false, 'vers':true
 				});
 		this.heals.set(22842, {'name':"Frenzied Regeneration", //TODO is mastery: true correct?
-				'int':false, 'mastery-boost':true, 'mastery':true,
-				'crit':true, 'haste-hpm':false, 'haste-hpct':false, 'vers':true
+				'int':false, 'mastery_boost':true, 'mastery':true,
+				'crit':true, 'haste_hpm':false, 'haste_hpct':false, 'vers':true
 				});
 		this.heals.set(5185, {'name':"Healing Touch",
-				'int':true, 'mastery-boost':false, 'mastery':true,
-				'crit':true, 'haste-hpm':false, 'haste-hpct':true, 'vers':true
+				'int':true, 'mastery_boost':false, 'mastery':true,
+				'crit':true, 'haste_hpm':false, 'haste_hpct':true, 'vers':true
 				});
 		this.heals.set(18562, {'name':"Swiftmend",
-				'int':true, 'mastery-boost':false, 'mastery':true,
-				'crit':true, 'haste-hpm':false, 'haste-hpct':false, 'vers':true
+				'int':true, 'mastery_boost':false, 'mastery':true,
+				'crit':true, 'haste_hpm':false, 'haste_hpct':false, 'vers':true
 				});		
 		this.heals.set(48503, {'name':"Living Seed", // TODO this one an obvious special case, how to handle?
-				'int':true, 'mastery-boost':false, 'mastery':true,
-				'crit':true, 'haste-hpm':false, 'haste-hpct':true, 'vers':true
+				'int':true, 'mastery_boost':false, 'mastery':true,
+				'crit':true, 'haste_hpm':false, 'haste_hpct':true, 'vers':true
 				});
 		this.heals.set(157982, {'name':"Tranquility",
-				'int':true, 'mastery-boost':false, 'mastery':true,
-				'crit':true, 'haste-hpm':false, 'haste-hpct':false, 'vers':true
+				'int':true, 'mastery_boost':false, 'mastery':true,
+				'crit':true, 'haste_hpm':false, 'haste_hpct':false, 'vers':true
 				});
 		this.heals.set(81269, {'name':"Effloresence", // TODO does efflo tick faster with haste?
-				'int':true, 'mastery-boost':false, 'mastery':true,
-				'crit':true, 'haste-hpm':true, 'haste-hpct':false, 'vers':true
+				'int':true, 'mastery_boost':false, 'mastery':true,
+				'crit':true, 'haste_hpm':true, 'haste_hpct':false, 'vers':true
 				});
 		this.heals.set(189853, {'name':"Dreamwalker",
-				'int':true, 'mastery-boost':false, 'mastery':true,
-				'crit':true, 'haste-hpm':false, 'haste-hpct':false, 'vers':true
+				'int':true, 'mastery_boost':false, 'mastery':true,
+				'crit':true, 'haste_hpm':false, 'haste_hpct':false, 'vers':true
 				});
 		this.heals.set(189800, {'name':"Nature's Essence",
-				'int':true, 'mastery-boost':false, 'mastery':true,
-				'crit':true, 'haste-hpm':false, 'haste-hpct':false, 'vers':true
+				'int':true, 'mastery_boost':false, 'mastery':true,
+				'crit':true, 'haste_hpm':false, 'haste_hpct':false, 'vers':true
 				});
 		this.heals.set(33778, {'name':"Lifebloom (bloom)",
-				'int':true, 'mastery-boost':false, 'mastery':true,
-				'crit':true, 'haste-hpm':false, 'haste-hpct':false, 'vers':true
+				'int':true, 'mastery_boost':false, 'mastery':true,
+				'crit':true, 'haste_hpm':false, 'haste_hpct':false, 'vers':true
 				});
 		// Ysera's gift has two spell IDs, one healing on you and one healing on others...
 		this.heals.set(145108, {'name':"Ysera's Gift", //TODO does it scale with any of these things?
-				'int':false, 'mastery-boost':false, 'mastery':false,
-				'crit':false, 'haste-hpm':false, 'haste-hpct':false, 'vers':false
+				'int':false, 'mastery_boost':false, 'mastery':false,
+				'crit':false, 'haste_hpm':false, 'haste_hpct':false, 'vers':false
 				});
 		this.heals.set(145110, {'name':"Ysera's Gift", //TODO does it scale with any of these things?
-				'int':false, 'mastery-boost':false, 'mastery':false,
-				'crit':false, 'haste-hpm':false, 'haste-hpct':false, 'vers':false
+				'int':false, 'mastery_boost':false, 'mastery':false,
+				'crit':false, 'haste_hpm':false, 'haste_hpct':false, 'vers':false
 				});
 		this.heals.set(33778, {'name':"Renewal", //TODO does it scale with any of these things?
-				'int':false, 'mastery-boost':false, 'mastery':false,
-				'crit':false, 'haste-hpm':false, 'haste-hpct':false, 'vers':false
+				'int':false, 'mastery_boost':false, 'mastery':false,
+				'crit':false, 'haste_hpm':false, 'haste_hpct':false, 'vers':false
 				});
 		this.heals.set(253432, {'name':"Dreamer (T21)",
-				'int':true, 'mastery-boost':true, 'mastery':true,
-				'crit':true, 'haste-hpm':true, 'haste-hpct':false, 'vers':true
+				'int':true, 'mastery_boost':true, 'mastery':true,
+				'crit':true, 'haste_hpm':true, 'haste_hpct':false, 'vers':true
 				});
 		this.heals.set(207428, {'name':"Xavaric's Magnum Opus",
-				'int':false, 'mastery-boost':false, 'mastery':false,
-				'crit':false, 'haste-hpm':false, 'haste-hpct':false, 'vers':false
+				'int':false, 'mastery_boost':false, 'mastery':false,
+				'crit':false, 'haste_hpm':false, 'haste_hpct':false, 'vers':false
 				});
 		// TODO add trinkets?
 		
@@ -139,7 +144,7 @@ class RestoDruidAnalyzer {
 		// these are hots to track, with healing attributable directly and by mastery
 		this.hotHealingMap = new Map(); // map from hot ID to obj w/ direct healing and mastery healing
 		for(let [healId, healObj] of this.heals.entries()) {
-			if(healObj.mastery-boost) {
+			if(healObj.mastery_boost) {
 				this.hotHealingMap.set(healId, {'name':healObj.name ,'direct':0, 'mastery':0});
 			}
 		}
@@ -172,7 +177,6 @@ class RestoDruidAnalyzer {
 		this.versRatingPerOne = 475;
 		this.bonusFromOneVers = 1 / this.versRatingPerOne / 100;
 		
-		//// MASTERY WEIGHT ////
 		
 		this.hotsOnTarget = new Map(); // map from player ID to a set of hot IDs
 		
@@ -180,26 +184,17 @@ class RestoDruidAnalyzer {
 		this.druidSpellNoMasteryHealing = 0; // total healing before mastery from spells that benefit from mastery
 		this.masteryTimesHealing = 0; // for calculating avg mastery stacks
 		
-		//// CRIT WEIGHT ////
+		this.totalOneMastery = 0;
 		
 		// TODO crit bonus stuff like DoS, Tauren boost
+		this.totalOneCrit = 0;
 		
-		this.totalExpectedCritHealing = 0; // total average case healing expected from crit
-		
-		//// HASTE WEIGHT ////
-		
-		this.totalHasteHpmHealing = 0;
-		this.totalHasteHpctHealing = 0;
-		
-		//// VERS WEIGHT ////
-		
-		this.totalVersHealing = 0;
-		
-		//// INT WEIGHT ////
-		
-		this.totalIntHealing = 0;
-		
-		//this.masteryAnalyzer = new RestoDruidMasteryAnalyzer(playerInfo);
+		this.totalOneHasteHpm = 0;
+		this.totalOneHasteHpct = 0;
+
+		this.totalOneVers = 0;
+
+		this.totalOneInt = 0;
 	}
 	
 	
@@ -223,10 +218,10 @@ class RestoDruidAnalyzer {
 					this.removeBuff(wclEvent);
 					break;
 				case 'heal' :
-					this.heal(wclEvent);
+					this.healOrAbsorb(wclEvent);
 					break;
 				case 'absorbed' :
-					this.absorbed(wclEvent);
+					this.healOrAbsorb(wclEvent);
 					break;
 				default :
 			}
@@ -279,7 +274,7 @@ class RestoDruidAnalyzer {
 		}
 	}
 	
-	heal(wclEvent) {
+	healOrAbsorb(wclEvent) {
 		let targetId = wclEvent.targetID;
 		let spellId = wclEvent.ability.guid;
 		
@@ -295,53 +290,46 @@ class RestoDruidAnalyzer {
 		}
 		
 		this.addSetIfAbsent(targetId);
-		if(this.heals.has(spellId)) {
-			let healInfo = this.heals.get(spellId);
-			if(healInfo.mastery) {
-				let hotsOn = this.hotsOnTarget.get(targetId);
-				let numHotsOn = hotsOn.size;
-				let healDetails = this.getHealDetails(amount, numHotsOn);
-
-				this.totalNoMasteryHealing += healDetails.noMastery;
-				this.druidSpellNoMasteryHealing += healDetails.noMastery;
-				this.masteryTimesHealing += healDetails.noMastery * numHotsOn;
-				
-				// give each HoT credit for mastery boosting
-				for(let hotOn of hotsOn) {
-					if(hotOn != spellId) { // prevents double count
-						this.hotHealingMap.get(hotOn).mastery += healDetails.oneStack;
-					}
+		let hotsOn = this.hotsOnTarget.get(targetId);
+		let numHotsOn = hotsOn.size;
+		
+		let healInfo = this.heals.get(spellId); // could be undefined
+		let healDetails = this.getHealDetails(wclEvent, numHotsOn);
+		
+		this.totalNoMasteryHealing += healDetails.noMastery;
+		if(healInfo !== undefined && healInfo.mastery) {
+			this.druidSpellNoMasteryHealing += healDetails.noMastery;
+			this.masteryTimesHealing += healDetails.noMastery * numHotsOn;
+			
+			// give each HoT credit for mastery boosting
+			for(let hotOn of hotsOn) {
+				if(hotOn != spellId) { // prevents double count
+					this.hotHealingMap.get(hotOn).mastery += healDetails.oneStack;
 				}
-				
-				// attribute healing to mastery buffs that are present
-				for(let[buffId, buffObj] of this.masteryBuffs.entries()) {
-					if(buffObj.active) {
-						let attribHealing = this.getBuffMasteryHealing(
-								healDetails, buffObj.amount);
-						buffObj.attributableHealing += attribHealing;
-					}
-				}
-			} else {
-				this.totalNoMasteryHealing += amount;
 			}
 			
-			if(healInfo.crit) {
-				
+			// attribute healing to mastery buffs that are present
+			for(let[buffId, buffObj] of this.masteryBuffs.entries()) {
+				if(buffObj.active) {
+					let attribHealing = this.getBuffMasteryHealing(
+							healDetails, buffObj.amount);
+					buffObj.attributableHealing += attribHealing;
+				}
 			}
-			
 		}
 		
-		
+		this.totalOneMastery += healDetails.oneMastery;
+		this.totalOneCrit += healDetails.oneCrit;
+		this.totalOneHasteHpm += healDetails.oneHasteHpm;
+		this.totalOneHasteHpct += healDetails.oneHasteHpct;
+		this.totalOneVers += healDetails.oneVers;
+		this.totalOneInt += healDetails.oneInt;
 	}
-	
-	absorbed(wclEvent) {
-		// absorbs don't interact with mastery, but they do count towards total healing
-		this.totalHealing += wclEvent.amount;
-		this.totalNoMasteryHealing += wclEvent.amount;
-	}
-	
+
 	damageTaken(wclEvent) {
-		
+		// we'll also count damage reduced by vers as effective healing
+		// for purposes of determining stat weights
+		console.log(wclEvent); // TODO implement
 	}
 	
 	//// HELPERS FUNCTIONS ////
@@ -362,7 +350,7 @@ class RestoDruidAnalyzer {
 		}
 		
 		let spellId = healEvent.ability.guid;
-		let healInfo = heals.get(spellId);
+		let healInfo = this.heals.get(spellId);
 		
 		// MASTERY //
 		
@@ -391,22 +379,37 @@ class RestoDruidAnalyzer {
 				noCritHealing = amount / this.critMultiplier;
 			}
 			
-			let oneCrit = this.bonusFromOneCrit * noCritHealing * this.critMultiplier;
+			oneCrit = this.bonusFromOneCrit * noCritHealing * this.critMultiplier;
 		}
 		
 		// HASTE //
 		
 		let oneHasteHpm = 0; // benefit from hpm only
 		let oneHasteHpct = 0; // benefit from hpct and hpm
-		// TODO implement
+		
+		let oneHaste = 0;
+		if(healInfo !== undefined) {
+			// TODO finish
+		}
 		
 		// VERS //
 		
-		// TODO implement
+		let oneVers = 0;
+		// almost everything benefits from vers, so if no healInfo for a spell we assume it DOES benefit
+		// effectively I'm getting vers benefit with a blacklist rather than a whitelist
+		if(healInfo === undefined || healInfo.vers) { 
+			let versBonus = this.getCurrVersBonus();
+			let noVersHealing = amount / (1 + versBonus);
+			oneVers = this.bonusFromOneVers * noVersHealing;
+		}
 		
 		// INT //
 		
-		// TODO implement
+		let oneInt = 0;
+		if(healInfo !== undefined && healInfo.int) {
+			let bonusFromOneInt = (1 / this.baseInt) * this.armorIntMultiplier;
+			oneInt = amount * bonusFromOneInt;
+		}
 		
 		return {'noMastery':noMasteryHealing, 'oneStack':oneStackMasteryHealing, 'oneMastery':oneMastery,
 				'oneCrit':oneCrit, 'oneHasteHpm':oneHasteHpm, 'oneHasteHpct':oneHasteHpct,
@@ -448,41 +451,67 @@ class RestoDruidAnalyzer {
 		return Math.round(healDetails.noMastery * masteryBonusFromBuff * healDetails.hotCount);
 	}
 	
-	getResult() {
-		let masteryResult = this.masteryAnalyzer.getResult();
-		
+	getResult() {		
 		let res = $('<div>', {"class":"panel panel-default"});
 		
 		let playerNameElement = $('<div>', {"class":"panel-heading"})
 				.html(toColorHtml("<b>" + this.playerName + " 🍂</br>", this.druidOrangeColor))
 				.appendTo(res);
-		
-		
-		// MASTERY RESULTS //
-		
+			
 		let hotsListElement = $('<ul>', {"class":"list-group"})
 				.appendTo(res);
-				
-		let healingFromOneMastery = masteryResult.healingFromOneRating;
-		let ratingForOnePercent = 0.01 / (healingFromOneMastery / this.totalHealing);
+		
+		// STAT WEIGHTS //
+		
+		// relative stat weights normalized so int = 1.00
+		// TODO error check for no healing doesn't cause divide by zero
+		let normalizedOneMastery = this.totalOneMastery / this.totalOneInt;
+		let normalizedOneCrit = this.totalOneCrit / this.totalOneInt;
+		let normalizedOneHasteHpm = this.totalOneHasteHpm / this.totalOneInt;
+		let normalizedOneHasteHpct = this.totalOneHasteHpct / this.totalOneInt;
+		let normalizedOneVers = this.totalOneVers / this.totalOneInt;
+		let normalizedOneInt = 1;
+		
 		$('<li>', {"class":"list-group-item small"})
-				.html("<p><b>Mastery Weight</b></p>" +
-						"&emsp;Healing from 1 Rating: <b>" + roundTo(healingFromOneMastery, 0) + "</b><br>" +
-						"&emsp;Rating for +1% Healing: <b>" + roundTo(ratingForOnePercent, 0) + "</b><br>")
+				.html("<p><b>Relative Stat Weights</b></p>" +
+						"&emsp;Mastery: <b>" + roundTo(normalizedOneMastery, 2) + "</b><br>" +
+						"&emsp;Crit: <b>" + roundTo(normalizedOneCrit, 2) + "</b><br>" +
+						"&emsp;Haste (HPM): <b>" + roundTo(normalizedOneHasteHpm, 2) + "</b><br>" +
+						"&emsp;Haste (HPCT): <b>" + roundTo(normalizedOneHasteHpct, 2) + "</b><br>" +
+						"&emsp;Versitility: <b>" + roundTo(normalizedOneVers, 2) + "</b><br>" +
+						"&emsp;Intellect: <b>" + roundTo(normalizedOneInt, 2) + "</b><br>")
 				.appendTo(hotsListElement);
 				
+		let ratingForOnePercentMastery = this.getRatingForOnePercentString(this.totalOneMastery);
+		let ratingForOnePercentCrit = this.getRatingForOnePercentString(this.totalOneCrit);
+		let ratingForOnePercentHasteHpm = this.getRatingForOnePercentString(this.totalOneHasteHpm);
+		let ratingForOnePercentHasteHpct = this.getRatingForOnePercentString(this.totalOneHasteHpct);
+		let ratingForOnePercentVers = this.getRatingForOnePercentString(this.totalOneVers);
+		let ratingForOnePercentInt = this.getRatingForOnePercentString(this.totalOneInt);	
+		$('<li>', {"class":"list-group-item small"})
+				.html("<p><b>Rating for +1% Healing</b></p>" +
+						"&emsp;Mastery: <b>" + roundTo(ratingForOnePercentMastery, 0) + "</b><br>" +
+						"&emsp;Crit: <b>" + roundTo(ratingForOnePercentCrit, 0) + "</b><br>" +
+						"&emsp;Haste (HPM): <b>" + roundTo(ratingForOnePercentHasteHpm, 0) + "</b><br>" +
+						"&emsp;Haste (HPCT): <b>" + roundTo(ratingForOnePercentHasteHpct, 0) + "</b><br>" +
+						"&emsp;Versitility: <b>" + roundTo(ratingForOnePercentVers, 0) + "</b><br>" +
+						"&emsp;Intellect: <b>" + roundTo(ratingForOnePercentInt, 0) + "</b><br>")
+				.appendTo(hotsListElement);
+				
+		// HOT / MASTERY STUFF //
+					
 		// add report for avg HoT stacks
-		let avgTotalMasteryStacks = roundTo(masteryResult.avgTotalMasteryStacks, 2);
-		let avgDruidSpellMasteryStacks = roundTo(masteryResult.avgDruidSpellMasteryStacks, 2);
+		let avgTotalMasteryStacks = this.masteryTimesHealing / this.totalNoMasteryHealing;
+		let avgDruidSpellMasteryStacks = this.masteryTimesHealing / this.druidSpellNoMasteryHealing;
 		$('<li>', {"class":"list-group-item small"})
 				.html("<p><b>Average Mastery Stacks</b></p>" +
-						"&emsp;All Healing: <b>" + avgTotalMasteryStacks + "</b><br>" +
-						"&emsp;Druid Spells: <b>" + avgDruidSpellMasteryStacks + "</b><br>")
+						"&emsp;All Healing: <b>" + roundTo(avgTotalMasteryStacks, 2) + "</b><br>" +
+						"&emsp;Druid Spells: <b>" + roundTo(avgDruidSpellMasteryStacks, 2) + "</b><br>")
 				.appendTo(hotsListElement);
 		
 		// add report for each HoT
 		let hotText = "<p><b>HoT Mastery Contributions</b></p>";
-		for(let [hotId, hotHealingObj] of masteryResult.hotHealing.entries()) {
+		for(let [hotId, hotHealingObj] of this.hotHealingMap.entries()) {
 			if(hotHealingObj.direct == 0) {
 				console.log("No healing from hot ID " + hotId);
 				continue; // don't include result entry for HoT you never used
@@ -490,7 +519,7 @@ class RestoDruidAnalyzer {
 			
 			let directPercent = roundTo(hotHealingObj.direct / this.totalHealing * 100, 1);
 			let masteryPercent = roundTo(hotHealingObj.mastery / this.totalHealing * 100, 1);	
-			let directTotal = rountTo(hotHealingObj.direct, 0).toLocaleString();
+			let directTotal = roundTo(hotHealingObj.direct, 0).toLocaleString();
 			let masteryTotal = roundTo(hotHealingObj.mastery, 0).toLocaleString();
 			hotText += "<p>&emsp;" + getSpellLinkHtml(hotId, hotHealingObj.name) +
 					'<br>&emsp;&emsp;Direct: <b>' + directPercent + "%</b> " +
@@ -506,7 +535,7 @@ class RestoDruidAnalyzer {
 		// add report for each buff
 		let hasProc = false;
 		let procText = "<p><b>Mastery Procs</b></p>";
-		for(let [buffId, buffObj] of masteryResult.masteryBuffHealing.entries()) {
+		for(let [buffId, buffObj] of this.masteryBuffs.entries()) {
 			if(buffObj.attributableHealing == 0) {
 				console.log("No healing from buff ID " + buffId);
 				continue; // don't include result entry for buff that never procced / gave bonus
@@ -531,6 +560,14 @@ class RestoDruidAnalyzer {
 				.appendTo(hotsListElement);
 		
 		return res;
+	}
+	
+	getRatingForOnePercentString(healingFromOne) {
+		if(healingFromOne === 0 || this.totalHealing === 0) {
+			return "N/A";
+		} else {
+			return 0.01 / (healingFromOne / this.totalHealing);
+		}
 	}
 	
 }
