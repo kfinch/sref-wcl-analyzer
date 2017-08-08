@@ -125,7 +125,7 @@ class RestoDruidAnalyzer {
 				'int':false, 'mastery_boost':false, 'mastery':false,
 				'crit':false, 'haste_hpm':false, 'haste_hpct':false, 'vers':false
 				});
-		this.heals.set(33778, {'name':"Renewal", //TODO does it scale with any of these things?
+		this.heals.set(108238, {'name':"Renewal", //TODO does it scale with any of these things?
 				'int':false, 'mastery_boost':false, 'mastery':false,
 				'crit':false, 'haste_hpm':false, 'haste_hpct':false, 'vers':false
 				});
@@ -360,7 +360,6 @@ class RestoDruidAnalyzer {
 		if(healInfo !== undefined && healInfo.mastery) {
 			let masteryBonus = this.getCurrMasteryBonus();		
 			let healMasteryMultiply = 1 + (hotCount * masteryBonus);
-			// TODO why round here, why not later?
 			noMasteryHealing = amount / healMasteryMultiply;
 			oneStackMasteryHealing = amount / (healMasteryMultiply / masteryBonus);
 			oneMastery = this.bonusFromOneMastery * noMasteryHealing * hotCount;
@@ -379,7 +378,7 @@ class RestoDruidAnalyzer {
 				noCritHealing = amount / this.critMultiplier;
 			}
 			
-			oneCrit = this.bonusFromOneCrit * noCritHealing * this.critMultiplier;
+			oneCrit = this.bonusFromOneCrit * noCritHealing * (this.critMultiplier - 1);
 		}
 		
 		// HASTE //
