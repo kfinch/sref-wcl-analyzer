@@ -386,9 +386,26 @@ class RestoDruidAnalyzer {
 		let oneHasteHpm = 0; // benefit from hpm only
 		let oneHasteHpct = 0; // benefit from hpct and hpm
 		
-		let oneHaste = 0;
-		if(healInfo !== undefined) {
-			// TODO finish
+		if(healInfo !== undefined && healInfo.haste_hpm) {
+			let hasteBonus = this.getCurrHasteBonus();
+			let noHasteHealing = amount / (1 + hasteBonus);
+			oneHasteHpm = this.bonusFromOneHaste * noHasteHealing;
+		}
+		
+		// TODO any way to make haste hpct calc less ugly?
+		if(healInfo !== undefined && healInfo) {
+			let hasteBonus = this.getCurrHasteBonus();
+			let noHasteHealing = amount / (1 + hasteBonus);
+			if(healInfo.haste_hpm) {
+				noHasteHealing = noHasteHealing / (1 + hasteBonus);
+			}
+			
+			let bonusFromOneHasteHpct = this.bonusFromOneHaste;
+			if(healInfo.haste_hpm) {
+				bonusFromOneHasteHpct = bonusFromOneHasteHpct * (1 + this.bonusFromOneHaste);
+			}
+			
+			oneHasteHpct = bonusFromOneHasteHpct * noHasteHealing;
 		}
 		
 		// VERS //
