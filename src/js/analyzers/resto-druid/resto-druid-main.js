@@ -205,6 +205,7 @@ class RestoDruidAnalyzer {
 		this.totalOneHasteHpm = 0;
 		this.totalOneHasteHpct = 0;
 		this.totalOneVers = 0;
+		this.totalOneVersDr = 0;
 		this.totalOneInt = 0;
 		
 		// these mostly for debugging, for tracking what percent of healing we count as benefiting from different stats
@@ -353,7 +354,7 @@ class RestoDruidAnalyzer {
 		let noVersDamage = wclEvent.amount / (1 - versDamageReduce);
 		let oneVers = noVersDamage * (this.bonusFromOneVers / 2);
 		
-		this.totalOneVers += oneVers;
+		this.totalOneVersDr += oneVers;
 	}
 	
 	//// HELPERS FUNCTIONS ////
@@ -527,6 +528,7 @@ class RestoDruidAnalyzer {
 		let normalizedOneHasteHpm = this.totalOneHasteHpm / this.totalOneInt;
 		let normalizedOneHasteHpct = this.totalOneHasteHpct / this.totalOneInt;
 		let normalizedOneVers = this.totalOneVers / this.totalOneInt;
+		let normalizedOneVersWithDr = (this.totalOneVers + this.totalOneVersDr) / this.totalOneInt;
 		let normalizedOneInt = 1;
 		
 		$('<li>', {"class":"list-group-item small"})
@@ -536,6 +538,7 @@ class RestoDruidAnalyzer {
 						"&emsp;Haste (HPM): <b>" + roundTo(normalizedOneHasteHpm, 2) + "</b><br>" +
 						"&emsp;Haste (HPCT): <b>" + roundTo(normalizedOneHasteHpct, 2) + "</b><br>" +
 						"&emsp;Versitility: <b>" + roundTo(normalizedOneVers, 2) + "</b><br>" +
+						"&emsp;Versitility (incl DR): <b>" + roundTo(normalizedOneVersWithDr, 2) + "</b><br>" +
 						"&emsp;Intellect: <b>" + roundTo(normalizedOneInt, 2) + "</b><br>")
 				.appendTo(hotsListElement);
 				
@@ -544,6 +547,7 @@ class RestoDruidAnalyzer {
 		let ratingForOnePercentHasteHpm = this.getRatingForOnePercentString(this.totalOneHasteHpm);
 		let ratingForOnePercentHasteHpct = this.getRatingForOnePercentString(this.totalOneHasteHpct);
 		let ratingForOnePercentVers = this.getRatingForOnePercentString(this.totalOneVers);
+		let ratingForOnePercentVersWithDr = this.getRatingForOnePercentString(this.totalOneVers + this.totalOneVersDr);
 		let ratingForOnePercentInt = this.getRatingForOnePercentString(this.totalOneInt);	
 		$('<li>', {"class":"list-group-item small"})
 				.html("<p><b>Rating for +1% Healing</b></p>" +
@@ -552,6 +556,7 @@ class RestoDruidAnalyzer {
 						"&emsp;Haste (HPM): <b>" + roundTo(ratingForOnePercentHasteHpm, 0) + "</b><br>" +
 						"&emsp;Haste (HPCT): <b>" + roundTo(ratingForOnePercentHasteHpct, 0) + "</b><br>" +
 						"&emsp;Versitility: <b>" + roundTo(ratingForOnePercentVers, 0) + "</b><br>" +
+						"&emsp;Versitility (incl DR): <b>" + roundTo(ratingForOnePercentVersWithDr, 0) + "</b><br>" +
 						"&emsp;Intellect: <b>" + roundTo(ratingForOnePercentInt, 0) + "</b><br>")
 				.appendTo(hotsListElement);
 				
