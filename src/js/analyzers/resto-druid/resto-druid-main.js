@@ -10,6 +10,8 @@
 class RestoDruidAnalyzer {
 	
 	constructor(playerName, playerInfo, fight, enemyNameMapping) {
+		this.debugMode = false;
+		
 		this.playerName = playerName;
 		this.playerInfo = playerInfo;
 		this.fight = fight;
@@ -32,7 +34,12 @@ class RestoDruidAnalyzer {
 		this.armorIntMultiplier = 1.05;
 		
 		this.critMultiplier = 2;
-		// TODO handle different mults from DoS, Tauren, ???
+		
+		if(playerInfo.gear[14].id === 142170) {
+			console.log(playerName + " is wearing Drape of Shame");
+			this.critMultiplier += 0.05;
+		}
+		// TODO handle different mults Tauren, ???
 		
 		this.totalHealing = 0; // total healing from all spells
 		
@@ -117,7 +124,7 @@ class RestoDruidAnalyzer {
 				'crit':true, 'haste_hpm':false, 'haste_hpct':false, 'vers':true
 				});
 		// Ysera's gift has two spell IDs, one healing on you and one healing on others...
-		this.heals.set(145108, {'name':"Ysera's Gift", //TODO does it scale with any of these things?
+		this.heals.set(145109, {'name':"Ysera's Gift", //TODO does it scale with any of these things?
 				'int':false, 'mastery_boost':false, 'mastery':false,
 				'crit':false, 'haste_hpm':false, 'haste_hpct':false, 'vers':false
 				});
@@ -129,11 +136,20 @@ class RestoDruidAnalyzer {
 				'int':false, 'mastery_boost':false, 'mastery':false,
 				'crit':false, 'haste_hpm':false, 'haste_hpct':false, 'vers':false
 				});
+		this.heals.set(224392, {'name':"Mark of Shifting", // TOOD does it scale with any of these things?
+				'int':false, 'mastery_boost':false, 'mastery':false,
+				'crit':false, 'haste_hpm':false, 'haste_hpct':false, 'vers':false
+				});
 		this.heals.set(253432, {'name':"Dreamer (T21)",
 				'int':true, 'mastery_boost':true, 'mastery':true,
 				'crit':true, 'haste_hpm':true, 'haste_hpct':false, 'vers':true
 				});
-		this.heals.set(207428, {'name':"Xavaric's Magnum Opus",
+		this.heals.set(207472, {'name':"Xavaric's Magnum Opus",
+				'int':false, 'mastery_boost':false, 'mastery':false,
+				'crit':false, 'haste_hpm':false, 'haste_hpct':false, 'vers':false
+				});
+		// after a fashion this scales with all stats, but for the sake of stat weights it's better to say 'none'
+		this.heals.set(143924, {'name':"Leech", 
 				'int':false, 'mastery_boost':false, 'mastery':false,
 				'crit':false, 'haste_hpm':false, 'haste_hpct':false, 'vers':false
 				});
@@ -165,7 +181,7 @@ class RestoDruidAnalyzer {
 		this.masteryRatingPerOne = 666.6;
 		this.bonusFromOneMastery = 1 / this.masteryRatingPerOne / 100;
 		
-		this.baseCritPercent = 0;
+		this.baseCritPercent = 8;
 		this.critRatingPerOne = 400;
 		this.bonusFromOneCrit = 1 / this.critRatingPerOne / 100;
 		
@@ -185,16 +201,18 @@ class RestoDruidAnalyzer {
 		this.masteryTimesHealing = 0; // for calculating avg mastery stacks
 		
 		this.totalOneMastery = 0;
-		
-		// TODO crit bonus stuff like DoS, Tauren boost
-		this.totalOneCrit = 0;
-		
+		this.totalOneCrit = 0;	
 		this.totalOneHasteHpm = 0;
 		this.totalOneHasteHpct = 0;
-
 		this.totalOneVers = 0;
-
 		this.totalOneInt = 0;
+		
+		// these mostly for debugging, for tracking what percent of healing we count as benefiting from different stats
+		this.totalMasteryBenefitHealing = 0;
+		this.totalCritBenefitHealing = 0;
+		this.totalHasteHpmBenefitHealing = 0;
+		this.totalVersBenefitHealing = 0;
+		this.totalIntBenefitHealing = 0;
 	}
 	
 	
@@ -240,7 +258,7 @@ class RestoDruidAnalyzer {
 				if(this.hotHealingMap.has(spellId)) { // prehot
 					this.addSetIfAbsent(targetId);
 					this.hotsOnTarget.get(targetId).add(spellId);
-					console.log("Player ID " + targetId + " prehotted with " +
+					this.debugLog("Player ID " + targetId + " prehotted with " +
 							this.hotHealingMap.get(spellId).name);
 				} else if(this.masteryBuffs.has(spellId)) { // pre-proc
 					this.masteryBuffs.get(spellId).active = true;
@@ -329,7 +347,13 @@ class RestoDruidAnalyzer {
 	damageTaken(wclEvent) {
 		// we'll also count damage reduced by vers as effective healing
 		// for purposes of determining stat weights
-		console.log(wclEvent); // TODO implement
+		
+		let versBonus = this.getCurrVersBonus();
+		let versDamageReduce = versBonus / 2;
+		let noVersDamage = wclEvent.amount / (1 - versDamageReduce);
+		let oneVers = noVersDamage * (this.bonusFromOneVers / 2);
+		
+		this.totalOneVers += oneVers;
 	}
 	
 	//// HELPERS FUNCTIONS ////
@@ -358,6 +382,8 @@ class RestoDruidAnalyzer {
 		let oneStackMasteryHealing = 0;
 		let oneMastery = 0;
 		if(healInfo !== undefined && healInfo.mastery) {
+			this.totalMasteryBenefitHealing += amount;
+			
 			let masteryBonus = this.getCurrMasteryBonus();		
 			let healMasteryMultiply = 1 + (hotCount * masteryBonus);
 			noMasteryHealing = amount / healMasteryMultiply;
@@ -369,6 +395,8 @@ class RestoDruidAnalyzer {
 		
 		let oneCrit = 0;
 		if(healInfo !== undefined && healInfo.crit) {
+			this.totalCritBenefitHealing += amount;
+			
 			// TODO handle different crit bonuses, Living Seed, RG bonus crit, and Abundance
 			let critBonus = this.getCurrCritBonus();
 			
@@ -387,6 +415,8 @@ class RestoDruidAnalyzer {
 		let oneHasteHpct = 0; // benefit from hpct and hpm
 		
 		if(healInfo !== undefined && healInfo.haste_hpm) {
+			this.totalHasteHpmBenefitHealing += amount;
+			
 			let hasteBonus = this.getCurrHasteBonus();
 			let noHasteHealing = amount / (1 + hasteBonus);
 			oneHasteHpm = this.bonusFromOneHaste * noHasteHealing;
@@ -414,6 +444,8 @@ class RestoDruidAnalyzer {
 		// almost everything benefits from vers, so if no healInfo for a spell we assume it DOES benefit
 		// effectively I'm getting vers benefit with a blacklist rather than a whitelist
 		if(healInfo === undefined || healInfo.vers) { 
+			this.totalVersBenefitHealing += amount;
+		
 			let versBonus = this.getCurrVersBonus();
 			let noVersHealing = amount / (1 + versBonus);
 			oneVers = this.bonusFromOneVers * noVersHealing;
@@ -423,6 +455,8 @@ class RestoDruidAnalyzer {
 		
 		let oneInt = 0;
 		if(healInfo !== undefined && healInfo.int) {
+			this.totalIntBenefitHealing += amount;
+			
 			let bonusFromOneInt = (1 / this.baseInt) * this.armorIntMultiplier;
 			oneInt = amount * bonusFromOneInt;
 		}
@@ -478,6 +512,13 @@ class RestoDruidAnalyzer {
 				.appendTo(res);
 		
 		// STAT WEIGHTS //
+		
+		this.debugLog("Healing that benefits from stat for " + this.playerName + ":" +
+				"\nInt: " + roundTo(this.totalIntBenefitHealing / this.totalHealing, 2) +
+				"\nMastery: " + roundTo(this.totalMasteryBenefitHealing / this.totalHealing, 2) +
+				"\nCrit: " + roundTo(this.totalCritBenefitHealing / this.totalHealing, 2) +
+				"\nHaste: " + roundTo(this.totalHasteHpmBenefitHealing / this.totalHealing, 2) +
+				"\nVers: " + roundTo(this.totalVersBenefitHealing / this.totalHealing, 2));
 		
 		// relative stat weights normalized so int = 1.00
 		// TODO error check for no healing doesn't cause divide by zero
@@ -583,6 +624,12 @@ class RestoDruidAnalyzer {
 			return "N/A";
 		} else {
 			return 0.01 / (healingFromOne / this.totalHealing);
+		}
+	}
+	
+	debugLog(message) {
+		if(this.debugMode) {
+			console.log(message);
 		}
 	}
 	
