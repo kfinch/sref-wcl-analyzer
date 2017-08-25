@@ -56,6 +56,11 @@
         </div>
         <div id="restoDruidCollapse" class="panel-collapse collapse" role="tabpanel" aria-labelledby="restoDruidHeader">
           <div class="panel-body">
+			<p><u>Stat Weights</u></p>
+			<p>Calculates your stat weights, based on your actual healing done and healing patterns over the course of the analyzed fight.</p>
+			<p>The 'Relative Stat Weights' section shows the weights normalized so Intellect is always 1. The 'Rating for 1% Healing' section shows the amount of additional stat rating you'll need in order to boost your total healing by 1%.</p>
+			<p>Haste (HPM) accounts only for the additional healing per cast you get from haste (because HoTs tick faster). This is the more valuable stat for raids, where mana is an issue. Haste (HPCT) also accounts for the additional maximum throughput you get by being able to cast faster. This could be more valuable in M+, where you are less likely to OOM.</p>
+			<p>The Versitility value accounts only for the bonus healing granted. The Versitility (incl DR) value also counts damage reduced due to Vers as additional healing done.</p>
             <p><u>Average Mastery Stacks</u></p>
             <p>Calculates the average number of mastery stacks you benefit from when healing. This average is weighted with respect to healing done (before mastery).</p>
             <p>The 'All Healing' entry counts the average over all your healing (and absorbs), even ones that don't benefit from Mastery like Ysera's Gift or Prydaz. This can give you a good feel for how much Mastery is contributing to overall healing done.</p>
@@ -95,6 +100,10 @@
         </div>
         <div id="changelogCollapse" class="panel-collapse collapse" role="tabpanel" aria-labelledby="changelogHeader">
           <div class="panel-body">
+			  <h5>8/25/2017</h5>
+              <ul>
+				<li>Added Resto Druid stat weight module</li>
+              </ul>
 			  <h5>8/1/2017</h5>
               <ul>
 				<li>Added preliminary support for the <a href="http://ptr.wowhead.com/spell=253432/dreamer">T21 2pc HoT</a></li>
