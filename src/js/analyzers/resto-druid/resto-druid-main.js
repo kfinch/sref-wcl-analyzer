@@ -51,7 +51,7 @@ class RestoDruidAnalyzer {
 		 * crit: can this crit?
 		 * haste_hpm: is this a HoT that ticks faster with haste?
 		 * haste_hpct: can this be cast more with haste? (i.e. non CD spells)
-		 * vers: does this benefit from versitility?
+		 * vers: does this benefit from Versatility?
 		 */
 		this.heals = new Map();
 		// RG ticks have 'tick: true', for direct that field is undefined
@@ -537,8 +537,8 @@ class RestoDruidAnalyzer {
 						"&emsp;Crit: <b>" + roundTo(normalizedOneCrit, 2) + "</b><br>" +
 						"&emsp;Haste (HPM): <b>" + roundTo(normalizedOneHasteHpm, 2) + "</b><br>" +
 						"&emsp;Haste (HPCT): <b>" + roundTo(normalizedOneHasteHpct, 2) + "</b><br>" +
-						"&emsp;Versitility: <b>" + roundTo(normalizedOneVers, 2) + "</b><br>" +
-						"&emsp;Versitility (incl DR): <b>" + roundTo(normalizedOneVersWithDr, 2) + "</b><br>" +
+						"&emsp;Versatility: <b>" + roundTo(normalizedOneVers, 2) + "</b><br>" +
+						"&emsp;Versatility (incl DR): <b>" + roundTo(normalizedOneVersWithDr, 2) + "</b><br>" +
 						"&emsp;Intellect: <b>" + roundTo(normalizedOneInt, 2) + "</b><br>")
 				.appendTo(hotsListElement);
 				
@@ -555,8 +555,8 @@ class RestoDruidAnalyzer {
 						"&emsp;Crit: <b>" + roundTo(ratingForOnePercentCrit, 0) + "</b><br>" +
 						"&emsp;Haste (HPM): <b>" + roundTo(ratingForOnePercentHasteHpm, 0) + "</b><br>" +
 						"&emsp;Haste (HPCT): <b>" + roundTo(ratingForOnePercentHasteHpct, 0) + "</b><br>" +
-						"&emsp;Versitility: <b>" + roundTo(ratingForOnePercentVers, 0) + "</b><br>" +
-						"&emsp;Versitility (incl DR): <b>" + roundTo(ratingForOnePercentVersWithDr, 0) + "</b><br>" +
+						"&emsp;Versatility: <b>" + roundTo(ratingForOnePercentVers, 0) + "</b><br>" +
+						"&emsp;Versatility (incl DR): <b>" + roundTo(ratingForOnePercentVersWithDr, 0) + "</b><br>" +
 						"&emsp;Intellect: <b>" + roundTo(ratingForOnePercentInt, 0) + "</b><br>")
 				.appendTo(hotsListElement);
 				
