@@ -533,13 +533,13 @@ class RestoDruidAnalyzer {
 		
 		$('<li>', {"class":"list-group-item small"})
 				.html("<p><b>Relative Stat Weights</b></p>" +
+						"&emsp;Intellect: <b>" + roundTo(normalizedOneInt, 2) + "</b><br>" + 
 						"&emsp;Mastery: <b>" + roundTo(normalizedOneMastery, 2) + "</b><br>" +
 						"&emsp;Crit: <b>" + roundTo(normalizedOneCrit, 2) + "</b><br>" +
 						"&emsp;Haste (HPM): <b>" + roundTo(normalizedOneHasteHpm, 2) + "</b><br>" +
 						"&emsp;Haste (HPCT): <b>" + roundTo(normalizedOneHasteHpct, 2) + "</b><br>" +
 						"&emsp;Versatility: <b>" + roundTo(normalizedOneVers, 2) + "</b><br>" +
-						"&emsp;Versatility (incl DR): <b>" + roundTo(normalizedOneVersWithDr, 2) + "</b><br>" +
-						"&emsp;Intellect: <b>" + roundTo(normalizedOneInt, 2) + "</b><br>")
+						"&emsp;Versatility (incl DR): <b>" + roundTo(normalizedOneVersWithDr, 2) + "</b><br>")
 				.appendTo(hotsListElement);
 				
 		let ratingForOnePercentMastery = this.getRatingForOnePercentString(this.totalOneMastery);
@@ -551,13 +551,13 @@ class RestoDruidAnalyzer {
 		let ratingForOnePercentInt = this.getRatingForOnePercentString(this.totalOneInt);	
 		$('<li>', {"class":"list-group-item small"})
 				.html("<p><b>Rating for +1% Healing</b></p>" +
+						"&emsp;Intellect: <b>" + roundTo(ratingForOnePercentInt, 0) + "</b><br>" +
 						"&emsp;Mastery: <b>" + roundTo(ratingForOnePercentMastery, 0) + "</b><br>" +
 						"&emsp;Crit: <b>" + roundTo(ratingForOnePercentCrit, 0) + "</b><br>" +
 						"&emsp;Haste (HPM): <b>" + roundTo(ratingForOnePercentHasteHpm, 0) + "</b><br>" +
 						"&emsp;Haste (HPCT): <b>" + roundTo(ratingForOnePercentHasteHpct, 0) + "</b><br>" +
 						"&emsp;Versatility: <b>" + roundTo(ratingForOnePercentVers, 0) + "</b><br>" +
-						"&emsp;Versatility (incl DR): <b>" + roundTo(ratingForOnePercentVersWithDr, 0) + "</b><br>" +
-						"&emsp;Intellect: <b>" + roundTo(ratingForOnePercentInt, 0) + "</b><br>")
+						"&emsp;Versatility (incl DR): <b>" + roundTo(ratingForOnePercentVersWithDr, 0) + "</b><br>")
 				.appendTo(hotsListElement);
 				
 		// HOT / MASTERY STUFF //
