@@ -18,3 +18,7 @@
 	cursor: pointer;
 }
 
+/* default analysis card font was too small */
+#analysis-div {
+	font-size: larger;
+}

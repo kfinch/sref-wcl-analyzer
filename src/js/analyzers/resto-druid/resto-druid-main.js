@@ -538,8 +538,8 @@ class RestoDruidAnalyzer {
 						"&emsp;Crit: <b>" + roundTo(normalizedOneCrit, 2) + "</b><br>" +
 						"&emsp;Haste (HPM): <b>" + roundTo(normalizedOneHasteHpm, 2) + "</b><br>" +
 						"&emsp;Haste (HPCT): <b>" + roundTo(normalizedOneHasteHpct, 2) + "</b><br>" +
-						"&emsp;Versatility: <b>" + roundTo(normalizedOneVers, 2) + "</b><br>" +
-						"&emsp;Versatility (incl DR): <b>" + roundTo(normalizedOneVersWithDr, 2) + "</b><br>")
+						"&emsp;Versatility: <b>" + roundTo(normalizedOneVers, 2) + "</b>" +
+						toColorHtml(" (" + roundTo(normalizedOneVersWithDr, 2) + " w/ DR)", this.darkGrayColor) + "<br>")
 				.appendTo(hotsListElement);
 				
 		let ratingForOnePercentMastery = this.getRatingForOnePercentString(this.totalOneMastery);
@@ -556,8 +556,8 @@ class RestoDruidAnalyzer {
 						"&emsp;Crit: <b>" + roundTo(ratingForOnePercentCrit, 0) + "</b><br>" +
 						"&emsp;Haste (HPM): <b>" + roundTo(ratingForOnePercentHasteHpm, 0) + "</b><br>" +
 						"&emsp;Haste (HPCT): <b>" + roundTo(ratingForOnePercentHasteHpct, 0) + "</b><br>" +
-						"&emsp;Versatility: <b>" + roundTo(ratingForOnePercentVers, 0) + "</b><br>" +
-						"&emsp;Versatility (incl DR): <b>" + roundTo(ratingForOnePercentVersWithDr, 0) + "</b><br>")
+						"&emsp;Versatility: <b>" + roundTo(ratingForOnePercentVers, 0) + "</b>" +
+						toColorHtml(" (" + roundTo(ratingForOnePercentVersWithDr, 0) + " w/ DR)", this.darkGrayColor) + "<br>")
 				.appendTo(hotsListElement);
 				
 		// HOT / MASTERY STUFF //
