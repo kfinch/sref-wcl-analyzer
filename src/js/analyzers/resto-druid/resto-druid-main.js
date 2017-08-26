@@ -10,8 +10,6 @@
 class RestoDruidAnalyzer {
 	
 	constructor(playerName, playerInfo, fight, enemyNameMapping) {
-		this.debugMode = false;
-		
 		this.playerName = playerName;
 		this.playerInfo = playerInfo;
 		this.fight = fight;
@@ -173,11 +171,26 @@ class RestoDruidAnalyzer {
 		
 		// these are common mastery procs to track
 		this.masteryBuffs = new Map(); // map from buff ID to obj with buff name and buff strength
-		this.masteryBuffs.set(232378, {'amount':4000, 'name':'T19 2pc', 'attributableHealing':0});
-		this.masteryBuffs.set(224149, {'amount':3000, 'name':"Jacin's Ruse", 'attributableHealing':0});	
+		this.masteryBuffs.set(232378, {'amount':4000, 'name':'T19 2pc'});
+		this.masteryBuffs.set(224149, {'amount':3000, 'name':"Jacin's Ruse"});	
 		// TODO: any other common buffs to add? What will I do about varying buff strength by item ilevel?
 		for(let[buffId, buffObj] of this.masteryBuffs.entries()) {
 			buffObj.attributableHealing = 0;
+			buffObj.active = false;
+		}
+		
+		// pull concordance strength
+		let concordanceBuffAmount = 0;
+		for (let artifactTalent of this.playerInfo.artifact) {
+			if(artifactTalent.spellID === 239042) { // the talent spellID, which is different from the proc ID
+				concordanceBuffAmount = 3700 + artifactTalent.rank * 300;
+			}
+		}
+		
+		// these are common int procs to track
+		this.intBuffs = new Map();
+		this.intBuffs.set(242586, {'amount':concordanceBuffAmount, 'name':'Concordance of the Legionfall'});
+		for(let[buffId, buffObj] of this.intBuffs.entries()) {
 			buffObj.active = false;
 		}
 		
@@ -265,10 +278,20 @@ class RestoDruidAnalyzer {
 				if(this.hotHealingMap.has(spellId)) { // prehot
 					this.addSetIfAbsent(targetId);
 					this.hotsOnTarget.get(targetId).add(spellId);
-					this.debugLog("Player ID " + targetId + " prehotted with " +
+					console.debug("Player ID " + targetId + " prehotted with " +
 							this.hotHealingMap.get(spellId).name);
 				} else if(this.masteryBuffs.has(spellId)) { // pre-proc
-					this.masteryBuffs.get(spellId).active = true;
+					let masteryBuff = this.masteryBuffs.get(spellId);
+					masteryBuff.active = true;
+					this.baseMasteryRating -= masteryBuff.amount;
+					console.debug(this.playerName + " started fight with Mastery Buff: " + masteryBuff.name + 
+							", adjusting base Mastery down by " + masteryBuff.amount);
+				} else if(this.intBuffs.has(spellId)) {
+					let intBuff = this.intBuffs.get(spellId);
+					intBuff.active = true;
+					this.baseInt -= intBuff.amount;
+					console.debug(this.playerName + " started fight with Mastery Buff: " + intBuff.name + 
+							", adjusting base Mastery down by " + intBuff.amount);
 				}
 			}
 		}
@@ -281,8 +304,13 @@ class RestoDruidAnalyzer {
 		if(this.hotHealingMap.has(spellId)) { // add hot to target
 			this.addSetIfAbsent(targetId);
 			this.hotsOnTarget.get(targetId).add(spellId);
+			console.debug(this.playerName + " HoT:" + spellId + " applied to Player:" + targetId);
 		} else if(this.masteryBuffs.has(spellId)) { // add mastery buff to self
 			this.masteryBuffs.get(spellId).active = true;
+			console.debug(this.playerName + " gains MasteryBuff:" + spellId);
+		} else if(this.intBuffs.has(spellId)) {
+			this.intBuffs.get(spellId).active = true;
+			console.debug(this.playerName + " gains IntellectBuff:" + spellId);
 		}
 	}
 	
@@ -294,8 +322,13 @@ class RestoDruidAnalyzer {
 		if(this.hotHealingMap.has(spellId)) { // remove hot from target
 			this.addSetIfAbsent(targetId);
 			this.hotsOnTarget.get(targetId).delete(spellId);
+			console.debug(this.playerName + " HoT:" + spellId + " removed from Player:" + targetId);
 		} else if(this.masteryBuffs.has(spellId)) { // remove mastery buff from self
 			this.masteryBuffs.get(spellId).active = false;
+			console.debug(this.playerName + " loses MasteryBuff:" + spellId);
+		} else if(this.intBuffs.has(spellId)) {
+			this.intBuffs.get(spellId).active = false;
+			console.debug(this.playerName + " loses IntellectBuff:" + spellId);
 		}
 	}
 	
@@ -351,7 +384,7 @@ class RestoDruidAnalyzer {
 			this.totalOneVers += healDetails.oneVers;
 			this.totalOneInt += healDetails.oneInt;
 		} else {
-			this.debugLog("Stat Weight Blacklist spell ID " + spellId + " healed for " + amount);
+			console.debug("Stat Weight Blacklist spell ID " + spellId + " healed for " + amount);
 		}
 	}
 
@@ -388,8 +421,8 @@ class RestoDruidAnalyzer {
 		let healInfo = this.heals.get(spellId);
 		
 		if(healInfo === undefined) {
-			this.debugLog(this.playerName + " used heal not in database:");
-			this.debugLog(healEvent);
+			console.debug(this.playerName + " used heal not in database:");
+			console.debug(healEvent);
 		}
 		
 		// MASTERY //
@@ -475,7 +508,7 @@ class RestoDruidAnalyzer {
 		if(healInfo !== undefined && healInfo.int) {
 			this.totalIntBenefitHealing += amount;
 			
-			let bonusFromOneInt = (1 / this.baseInt) * this.armorIntMultiplier;
+			let bonusFromOneInt = (1 / this.getCurrInt()) * this.armorIntMultiplier;
 			oneInt = amount * bonusFromOneInt;
 		}
 		
@@ -483,6 +516,16 @@ class RestoDruidAnalyzer {
 				'oneCrit':oneCrit, 'oneHasteHpm':oneHasteHpm, 'oneHasteHpct':oneHasteHpct,
 				'oneVers':oneVers, 'oneInt':oneInt,
 				'total':amount, 'hotCount':hotCount};
+	}
+	
+	getCurrInt() {
+		let intRating = this.baseInt;
+		for(let intBuff of this.intBuffs.values()) {
+			if(intBuff.active) {
+				intRating += intBuff.amount;
+			}
+		}
+		return intRating;
 	}
 	
 	getCurrMasteryBonus() {
@@ -531,7 +574,7 @@ class RestoDruidAnalyzer {
 		
 		// STAT WEIGHTS //
 		
-		this.debugLog("Healing that benefits from stat for " + this.playerName + ":" +
+		console.debug("Healing that benefits from stat for " + this.playerName + ":" +
 				"\nInt: " + roundTo(this.totalIntBenefitHealing / this.totalHealing, 2) +
 				"\nMastery: " + roundTo(this.totalMasteryBenefitHealing / this.totalHealing, 2) +
 				"\nCrit: " + roundTo(this.totalCritBenefitHealing / this.totalHealing, 2) +
@@ -650,12 +693,6 @@ class RestoDruidAnalyzer {
 			return "N/A";
 		} else {
 			return 0.01 / (healingFromOne / this.totalHealing);
-		}
-	}
-	
-	debugLog(message) {
-		if(this.debugMode) {
-			console.log(message);
 		}
 	}
 	
