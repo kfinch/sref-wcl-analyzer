@@ -39,7 +39,8 @@ class RestoDruidAnalyzer {
 			console.log(playerName + " is wearing Drape of Shame");
 			this.critMultiplier += 0.05;
 		}
-		// TODO handle different mults Tauren, ???
+		
+		this.taurenCritMult = 1.02; // addon multiplier for Tauren racial
 		
 		this.totalHealing = 0; // total healing from all spells
 		
@@ -99,15 +100,16 @@ class RestoDruidAnalyzer {
 				'int':true, 'mastery_boost':false, 'mastery':true,
 				'crit':true, 'haste_hpm':false, 'haste_hpct':false, 'vers':true
 				});		
-		this.heals.set(48503, {'name':"Living Seed", // TODO this one an obvious special case, how to handle?
+		this.heals.set(48503, {'name':"Living Seed",
 				'int':true, 'mastery_boost':false, 'mastery':true,
-				'crit':true, 'haste_hpm':false, 'haste_hpct':true, 'vers':true
+				'crit':true, 'haste_hpm':false, 'haste_hpct':true, 'vers':true,
+				'isLivingSeed':true // this flag checked when doing crit calculation
 				});
 		this.heals.set(157982, {'name':"Tranquility",
 				'int':true, 'mastery_boost':false, 'mastery':true,
 				'crit':true, 'haste_hpm':false, 'haste_hpct':false, 'vers':true
 				});
-		this.heals.set(81269, {'name':"Effloresence", // TODO does efflo tick faster with haste?
+		this.heals.set(81269, {'name':"Effloresence",
 				'int':true, 'mastery_boost':false, 'mastery':true,
 				'crit':true, 'haste_hpm':true, 'haste_hpct':false, 'vers':true
 				});
@@ -410,17 +412,19 @@ class RestoDruidAnalyzer {
 		let oneCrit = 0;
 		if(healInfo !== undefined && healInfo.crit) {
 			this.totalCritBenefitHealing += amount;
-			
-			// TODO handle different crit bonuses, Living Seed, RG bonus crit, and Abundance
-			let critBonus = this.getCurrCritBonus();
-			
-			// a 'hitType' of 2 in the wclEvent seems to indicate a crit
-			let noCritHealing = amount;
-			if(healEvent.hitType === 2) {
-				noCritHealing = amount / this.critMultiplier;
+
+			if(healInfo.isLivingSeed) {
+				// living seed needs a special crit calc, for obvious reasons
+				let additionalLivingSeedChance = this.bonusFromOneCrit / this.getCurrCritBonus();
+				oneCrit = additionalLivingSeedChance * amount;
+			} else {
+				// a 'hitType' of 2 in the wclEvent seems to indicate a crit
+				let noCritHealing = amount;
+				if(healEvent.hitType === 2) {
+					noCritHealing = amount / this.critMultiplier;
+				}
+				oneCrit = this.bonusFromOneCrit * noCritHealing * (this.critMultiplier - 1);
 			}
-			
-			oneCrit = this.bonusFromOneCrit * noCritHealing * (this.critMultiplier - 1);
 		}
 		
 		// HASTE //
@@ -538,6 +542,7 @@ class RestoDruidAnalyzer {
 		// TODO error check for no healing doesn't cause divide by zero
 		let normalizedOneMastery = this.totalOneMastery / this.totalOneInt;
 		let normalizedOneCrit = this.totalOneCrit / this.totalOneInt;
+		let normalizedOneCritTauren = normalizedOneCrit * this.taurenCritMult;
 		let normalizedOneHasteHpm = this.totalOneHasteHpm / this.totalOneInt;
 		let normalizedOneHasteHpct = this.totalOneHasteHpct / this.totalOneInt;
 		let normalizedOneVers = this.totalOneVers / this.totalOneInt;
@@ -548,7 +553,8 @@ class RestoDruidAnalyzer {
 				.html("<p><b>Relative Stat Weights</b></p>" +
 						"&emsp;Intellect: <b>" + roundTo(normalizedOneInt, 2) + "</b><br>" + 
 						"&emsp;Mastery: <b>" + roundTo(normalizedOneMastery, 2) + "</b><br>" +
-						"&emsp;Crit: <b>" + roundTo(normalizedOneCrit, 2) + "</b><br>" +
+						"&emsp;Crit: <b>" + roundTo(normalizedOneCrit, 2) + "</b>" +
+						toColorHtml(" (" + roundTo(normalizedOneCritTauren, 2) + " for Tauren)", this.darkGrayColor) + "<br>" + 
 						"&emsp;Haste (HPM): <b>" + roundTo(normalizedOneHasteHpm, 2) + "</b><br>" +
 						"&emsp;Haste (HPCT): <b>" + roundTo(normalizedOneHasteHpct, 2) + "</b><br>" +
 						"&emsp;Versatility: <b>" + roundTo(normalizedOneVers, 2) + "</b>" +
@@ -557,6 +563,7 @@ class RestoDruidAnalyzer {
 				
 		let ratingForOnePercentMastery = this.getRatingForOnePercentString(this.totalOneMastery);
 		let ratingForOnePercentCrit = this.getRatingForOnePercentString(this.totalOneCrit);
+		let ratingForOnePercentCritTauren = this.getRatingForOnePercentString(this.totalOneCrit * this.taurenCritMult);
 		let ratingForOnePercentHasteHpm = this.getRatingForOnePercentString(this.totalOneHasteHpm);
 		let ratingForOnePercentHasteHpct = this.getRatingForOnePercentString(this.totalOneHasteHpct);
 		let ratingForOnePercentVers = this.getRatingForOnePercentString(this.totalOneVers);
@@ -566,7 +573,8 @@ class RestoDruidAnalyzer {
 				.html("<p><b>Rating for +1% Healing</b></p>" +
 						"&emsp;Intellect: <b>" + roundTo(ratingForOnePercentInt, 0) + "</b><br>" +
 						"&emsp;Mastery: <b>" + roundTo(ratingForOnePercentMastery, 0) + "</b><br>" +
-						"&emsp;Crit: <b>" + roundTo(ratingForOnePercentCrit, 0) + "</b><br>" +
+						"&emsp;Crit: <b>" + roundTo(ratingForOnePercentCrit, 0) + "</b>" +
+						toColorHtml(" (" + roundTo(ratingForOnePercentCritTauren, 0) + " for Tauren)", this.darkGrayColor) + "<br>" + 
 						"&emsp;Haste (HPM): <b>" + roundTo(ratingForOnePercentHasteHpm, 0) + "</b><br>" +
 						"&emsp;Haste (HPCT): <b>" + roundTo(ratingForOnePercentHasteHpct, 0) + "</b><br>" +
 						"&emsp;Versatility: <b>" + roundTo(ratingForOnePercentVers, 0) + "</b>" +
