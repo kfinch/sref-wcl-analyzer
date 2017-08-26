@@ -155,6 +155,10 @@ class RestoDruidAnalyzer {
 				});
 		// TODO add trinkets?
 		
+		// heals to not include when generating stat weights
+		this.statWeightBlacklist = new Set();
+		this.statWeightBlacklist.add(157982); // Tranquility
+		
 		//// MASTERY ATTRIBUTION TO SPELLS AND PROCS ////
 		
 		// these are hots to track, with healing attributable directly and by mastery
@@ -337,12 +341,16 @@ class RestoDruidAnalyzer {
 			}
 		}
 		
-		this.totalOneMastery += healDetails.oneMastery;
-		this.totalOneCrit += healDetails.oneCrit;
-		this.totalOneHasteHpm += healDetails.oneHasteHpm;
-		this.totalOneHasteHpct += healDetails.oneHasteHpct;
-		this.totalOneVers += healDetails.oneVers;
-		this.totalOneInt += healDetails.oneInt;
+		if(!this.statWeightBlacklist.has(spellId)) {
+			this.totalOneMastery += healDetails.oneMastery;
+			this.totalOneCrit += healDetails.oneCrit;
+			this.totalOneHasteHpm += healDetails.oneHasteHpm;
+			this.totalOneHasteHpct += healDetails.oneHasteHpct;
+			this.totalOneVers += healDetails.oneVers;
+			this.totalOneInt += healDetails.oneInt;
+		} else {
+			this.debugLog("Stat Weight Blacklist spell ID " + spellId + " healed for " + amount);
+		}
 	}
 
 	damageTaken(wclEvent) {
@@ -376,6 +384,11 @@ class RestoDruidAnalyzer {
 		
 		let spellId = healEvent.ability.guid;
 		let healInfo = this.heals.get(spellId);
+		
+		if(healInfo === undefined) {
+			this.debugLog(this.playerName + " used heal not in database:");
+			this.debugLog(healEvent);
+		}
 		
 		// MASTERY //
 		
