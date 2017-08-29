@@ -584,10 +584,10 @@ class RestoDruidAnalyzer {
 				
 		// console log the weights normalized like RDSW (for easier comparison)
 		let highest = this.totalOneInt;
-		if(this.totalOneCrit > highest) { higesht = this.totalOneCrit; }
-		if(this.totalOneHasteHpm > highest) { higesht = this.totalOneHasteHpm; }
-		if(this.totalOneMastery > highest) { higesht = this.totalOneMastery; }
-		if(this.normalizedOneVers > highest) { higesht = this.normalizedOneVers; }
+		if(this.totalOneCrit > highest) { highest = this.totalOneCrit; }
+		if(this.totalOneHasteHpm > highest) { highest = this.totalOneHasteHpm; }
+		if(this.totalOneMastery > highest) { highest = this.totalOneMastery; }
+		if(this.normalizedOneVers > highest) { highest = this.normalizedOneVers; }
 		let normalizedOneIntHighest = this.totalOneInt / highest;
 		let normalizedOneCritHighest = this.totalOneCrit / highest;
 		let normalizedOneHasteHighest = this.totalOneHasteHpm / highest;
