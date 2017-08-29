@@ -57,6 +57,8 @@ class EventQueryWorker {
 	// iterate through events in page, handing off to eventCallback
 	// if there's more, fetch next page, if not call the doneCallback and exit
 	parsePage(data, resolve, reject) {
+		console.debug(data);
+		
 		for(let wclEvent of data.events) {
 			this.eventCallback(wclEvent);
 		}

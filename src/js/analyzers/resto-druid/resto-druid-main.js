@@ -86,9 +86,9 @@ class RestoDruidAnalyzer {
 				'int':true, 'mastery_boost':true, 'mastery':true,
 				'crit':true, 'haste_hpm':true, 'haste_hpct':false, 'vers':true
 				});
-		this.heals.set(22842, {'name':"Frenzied Regeneration", //TODO is mastery: true correct?
-				'int':false, 'mastery_boost':true, 'mastery':true,
-				'crit':true, 'haste_hpm':false, 'haste_hpct':false, 'vers':true
+		this.heals.set(22842, {'name':"Frenzied Regeneration",
+				'int':false, 'mastery_boost':true, 'mastery':false,
+				'crit':false, 'haste_hpm':false, 'haste_hpct':false, 'vers':true
 				});
 		this.heals.set(5185, {'name':"Healing Touch",
 				'int':true, 'mastery_boost':false, 'mastery':true,
@@ -158,6 +158,7 @@ class RestoDruidAnalyzer {
 		// heals to not include when generating stat weights
 		this.statWeightBlacklist = new Set();
 		this.statWeightBlacklist.add(157982); // Tranquility
+		this.statWeightBlacklist.add(235967); // Velen's 
 		
 		//// MASTERY ATTRIBUTION TO SPELLS AND PROCS ////
 		
