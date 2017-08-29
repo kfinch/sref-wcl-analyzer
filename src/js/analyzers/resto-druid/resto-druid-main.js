@@ -88,7 +88,7 @@ class RestoDruidAnalyzer {
 				});
 		this.heals.set(22842, {'name':"Frenzied Regeneration",
 				'int':false, 'mastery_boost':true, 'mastery':false,
-				'crit':false, 'haste_hpm':false, 'haste_hpct':false, 'vers':true
+				'crit':false, 'haste_hpm':false, 'haste_hpct':false, 'vers':false
 				});
 		this.heals.set(5185, {'name':"Healing Touch",
 				'int':true, 'mastery_boost':false, 'mastery':true,
