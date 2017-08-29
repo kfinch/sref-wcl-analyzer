@@ -581,6 +581,25 @@ class RestoDruidAnalyzer {
 				"\nCrit: " + roundTo(this.totalCritBenefitHealing / this.totalHealing, 2) +
 				"\nHaste: " + roundTo(this.totalHasteHpmBenefitHealing / this.totalHealing, 2) +
 				"\nVers: " + roundTo(this.totalVersBenefitHealing / this.totalHealing, 2));
+				
+		// console log the weights normalized like RDSW (for easier comparison)
+		let highest = this.totalOneInt;
+		if(this.totalOneCrit > highest) { higesht = this.totalOneCrit; }
+		if(this.totalOneHasteHpm > highest) { higesht = this.totalOneHasteHpm; }
+		if(this.totalOneMastery > highest) { higesht = this.totalOneMastery; }
+		if(this.normalizedOneVers > highest) { higesht = this.normalizedOneVers; }
+		let normalizedOneIntHighest = this.totalOneInt / highest;
+		let normalizedOneCritHighest = this.totalOneCrit / highest;
+		let normalizedOneHasteHighest = this.totalOneHasteHpm / highest;
+		let normalizedOneMasteryHighest = this.totalOneMastery / highest;
+		let normalizedOneVersHighest = this.totalOneVers / highest;
+		console.log("Weights displayed as RDSW would:" +
+				"\nINT: " + roundTo(normalizedOneIntHighest, 2) +
+				"\nCRT: " + roundTo(normalizedOneCritHighest, 2) +
+				"\nHST: " + roundTo(normalizedOneHasteHighest, 2) +
+				"\nMST: " + roundTo(normalizedOneMasteryHighest, 2) +
+				"\nVRS: " + roundTo(normalizedOneVersHighest, 2));
+		
 		
 		// relative stat weights normalized so int = 1.00
 		// TODO error check for no healing doesn't cause divide by zero
